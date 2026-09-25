@@ -56,4 +56,5 @@ def test_release_bundle_hashes_selected_checkpoint(
     assert (bundle / "model.pt").read_bytes() == checkpoint.read_bytes()
     assert result["files_sha256"]["model.pt"] == digest
     assert (bundle / "README.md").read_text() == "test"
+    assert json.loads((bundle / "training_args.json").read_text())["best_checkpoint"] == "model.pt"
     assert release_package.package_release(paths)["checkpoint_sha256"] == digest

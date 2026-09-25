@@ -23,6 +23,7 @@ def main() -> None:
         "--baseline", type=Path, default=Path("artifacts/e0_validation_metrics.json")
     )
     parser.add_argument("--candidate", type=Path, action="append", required=True)
+    parser.add_argument("--progress", type=Path, default=Path("artifacts/e1_progress.json"))
     parser.add_argument("--output", type=Path, default=Path("artifacts/checkpoint_selection.json"))
     args = parser.parse_args()
     baseline = json.loads(args.baseline.read_text(encoding="utf-8"))
@@ -33,6 +34,15 @@ def main() -> None:
     ):
         raise ValueError("Complete E0 validation comparison is required")
     baseline_ar_cer = _metric(baseline["metrics"]["overall_ar_cer"], "E0 Arabic CER")
+    progress = json.loads(args.progress.read_text(encoding="utf-8"))
+    shortlist = progress.get("shortlist_checkpoint_sha256")
+    if (
+        progress.get("locked_benchmark_used") is not False
+        or progress.get("selection_subset") != "first 50 frozen validation prompts"
+        or not isinstance(shortlist, list)
+        or not shortlist
+    ):
+        raise ValueError("Verified 50-prompt E1 shortlist is required")
     scored: list[dict[str, float]] = []
     identities: list[str] = []
     for path in args.candidate:
@@ -58,10 +68,13 @@ def main() -> None:
                 "candidate_index": float(len(scored)),
             }
         )
+    if len(identities) != len(shortlist) or set(identities) != set(shortlist):
+        raise ValueError("Full-validation candidates must match the frozen 50-prompt shortlist")
     selected = choose_checkpoint(scored, baseline_ar_cer)
     index = int(selected["candidate_index"])
     result = {
         "selection_set": "189 validation prompts; locked benchmark excluded",
+        "screening_set": "first 50 frozen validation prompts; top 3 eligible by EER then WER",
         "metric_order": ["english_eer", "cs_wer"],
         "arabic_cer_guardrail": "overall validation Arabic CER <= 1.05 * E0 validation",
         "baseline_ar_cer": baseline_ar_cer,

@@ -4,12 +4,19 @@ Local Windows virtual environment: Python 3.10.20 in `D:\MasriSwitch-TTS\artifac
 Dependencies and caches are under `D:\MasriSwitch-TTS`.
 
 2026-09-25: `ruff format --check src tests scripts`, `ruff check src tests scripts`,
-`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 129 tests.
+`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 136 tests.
 The added inference tests verify that a private reference and a path escaping
 `artifacts/reference` cannot enable public synthesis.
 The disabled Gradio demo constructed successfully (`Blocks`, six components).
 `release-check` failed closed as expected while the selected train manifest,
 final E1 evaluation, and completed model card are missing.
+The selected-checkpoint finalizer tests cover local checkpoint hash binding,
+metric-selection identity, and the complete audited train-ID set.
+The release bundle now records `model.pt` as a portable relative checkpoint
+path in `training_args.json`; the bundled model bytes remain hash-checked.
+The model card renderer now states both the actual training endpoint and the
+selected checkpoint update, and requires verified early-stop evidence if the
+run ends before 8,000 updates.
 GNU make is not installed
 on this host, so the equivalent commands in the Makefile were run directly.
 
@@ -50,6 +57,12 @@ SHA256 is `c3eac52f7456d78367d4bec8209ab5c7cd2876226c0a4dc6a4ffdc25993c08e4`.
 English EER was 40.00%, code-switch WER 43.58%, and overall Arabic CER 35.45%
 (`artifacts/e1_validation_c3eac52f7456_metrics.json`). The bounded early-stop
 review has one stale evaluation and does not stop E1 yet.
+The 4,000-update stage also passed exact-update, audited train-ID, and
+ten-prompt private checkpoint checks. Its checkpoint SHA256 is
+`02f0a3ab57ff5489ee7eb23438a1e8b6477564f12b34ed69b67797c3cb1648d6`.
+All 50 validation outputs were valid. English EER was 34.74%, code-switch WER
+44.03%, and overall Arabic CER 37.91%; the Arabic guardrail fails on this
+subset. The early-stop review now records two consecutive stale checks.
 
 Kaggle CPU Python 3.10.20 environment imported F5-TTS 1.1.7, PyTorch
 2.6.0+cu124, torchaudio 2.6.0, Transformers 4.46.3, Accelerate 1.15.0,

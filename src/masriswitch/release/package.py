@@ -42,7 +42,6 @@ def package_release(paths: Paths) -> dict[str, Any]:
         "NOTICE": paths.root / "NOTICE",
         "config.yaml": paths.artifacts / "upstream" / "silma" / "config.yaml",
         "vocab.txt": paths.artifacts / "upstream" / "silma" / "vocab.txt",
-        "training_args.json": paths.artifacts / "train_manifest.json",
         "data_manifest.json": paths.artifacts / "data_audit.json",
         "eval_results.json": paths.artifacts / "eval_metrics.json",
     }
@@ -50,7 +49,13 @@ def package_release(paths: Paths) -> dict[str, Any]:
         if not source.is_file():
             raise FileNotFoundError(source)
         shutil.copy2(source, destination / name)
-    hashes = {name: sha256_file(destination / name) for name in ["model.pt", *files]}
+    portable_train = {**train, "best_checkpoint": "model.pt"}
+    (destination / "training_args.json").write_text(
+        json.dumps(portable_train, indent=2) + "\n", encoding="utf-8"
+    )
+    hashes = {
+        name: sha256_file(destination / name) for name in ["model.pt", "training_args.json", *files]
+    }
     manifest = {
         "checkpoint_sha256": train["checkpoint_sha256"],
         "files_sha256": hashes,

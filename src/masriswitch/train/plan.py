@@ -102,3 +102,23 @@ def review_validation_progress(
             ):
                 best_index = index
     return {"best_index": best_index, "stale_evaluations": stale, "stop_early": stale >= 3}
+
+
+def shortlist_validation_candidates(
+    candidates: list[dict[str, float]], baseline_ar_cer: float, *, limit: int = 3
+) -> list[int]:
+    """Rank eligible 50-prompt checks for a bounded full-validation comparison."""
+    if not candidates or baseline_ar_cer < 0 or limit <= 0:
+        raise ValueError("Candidates, baseline CER, and positive limit are required")
+    eligible = []
+    for index, item in enumerate(candidates):
+        if not all(math.isfinite(item[key]) for key in ("english_eer", "cs_wer", "ar_cer")):
+            raise ValueError("Non-finite validation metric")
+        if item["ar_cer"] <= baseline_ar_cer * 1.05:
+            eligible.append(index)
+    if not eligible:
+        raise ValueError("No checkpoint passes Arabic CER guardrail")
+    return sorted(
+        eligible,
+        key=lambda index: (candidates[index]["english_eer"], candidates[index]["cs_wer"], index),
+    )[:limit]

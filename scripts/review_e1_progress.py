@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from masriswitch.train.plan import review_validation_progress
+from masriswitch.train.plan import review_validation_progress, shortlist_validation_candidates
 from masriswitch.train.verify import verify_e1_stage
 
 
@@ -59,10 +59,15 @@ def main() -> None:
         candidates.append(item)
         stages.append({"updates": updates, "checkpoint_sha256": sha, **item})
     review = review_validation_progress(candidates, baseline["metrics"]["overall_ar_cer"])
+    shortlisted = shortlist_validation_candidates(candidates, baseline["metrics"]["overall_ar_cer"])
     payload = {
         "selection_subset": "first 50 frozen validation prompts",
         "locked_benchmark_used": False,
         "stages": stages,
+        "shortlist_rule": "top 3 eligible checkpoints by English EER, then code-switch WER",
+        "shortlist_checkpoint_sha256": [
+            stages[index]["checkpoint_sha256"] for index in shortlisted
+        ],
         **review,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

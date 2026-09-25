@@ -19,6 +19,11 @@ has English EER 36.88%, code-switch WER 45.11%, and overall Arabic CER 36.35%
 Arabic-only, so the selection guardrail uses overall Arabic CER on validation;
 the final comparison will separately measure Arabic-only CER on the fixed
 489-prompt plan. The 300 locked benchmark prompts are excluded from selection.
+To bound GPU use, every 1,000-update checkpoint is screened on the same frozen
+first 50 validation prompts. The three eligible checkpoints with lowest
+English EER, then code-switch WER, advance to the full 189-prompt validation
+comparison. The final checkpoint is chosen from those three by the same metric
+order and Arabic CER guardrail; locked benchmark prompts never influence it.
 
 At 1,000 E1 updates, an early 50-prompt validation check measured English EER
 32.63% versus E0 37.89%, code-switch WER 44.48% versus E0 43.43%, and overall
@@ -31,3 +36,7 @@ Arabic CER 35.45%, again with zero invalid outputs. The checkpoint passed the
 audited train-ID, exact-update, finite-loss, and ten-prompt private smoke
 checks. This is the first validation check with neither EER nor code-switch
 WER improving over previous E1 checks (`artifacts/e1_progress.json`).
+At 4,000 updates, English EER was 34.74%, code-switch WER 44.03%, and overall
+Arabic CER 37.91%, with zero invalid outputs. The Arabic CER fails the 5%
+relative guardrail on these 50 validation prompts. This is the second stale
+check under the predeclared early-stop rule.

@@ -59,7 +59,7 @@ JSONL SHA256 matches the local manifest.
 | Experiment | Code-switch WER | English EER | Arabic CER | Status |
 |---|---:|---:|---:|---|
 | E0 SILMA baseline | 61.38% | 51.60% | 38.57% | 489 prompts measured |
-| E1 fine-tune | TBD | TBD | TBD | 3,000/8,000 updates verified; interim 50-prompt validation measured |
+| E1 fine-tune | TBD | TBD | TBD | 4,000/8,000 updates verified; interim 50-prompt validation measured |
 | E2 replay | TBD | TBD | TBD | Optional |
 
 ## Licenses and limitations
@@ -78,11 +78,11 @@ documented consent; arbitrary voice uploads are not supported. SILMA's example
 audio is limited to private smoke tests because its speaker consent for public
 reuse was not documented.
 
-The 1,000-, 2,000-, and 3,000-update E1 checkpoints passed exact-update and
-private inference checks. Their 50-prompt validation results are interim and
-are not the locked benchmark result. The 3,000-update check worsened on both
-English EER and code-switch WER relative to the previous E1 best; the declared
-early-stop rule has not fired.
+The 1,000- through 4,000-update E1 checkpoints passed exact-update and private
+inference checks. Their 50-prompt validation results are interim and are not
+the locked benchmark result. The 3,000- and 4,000-update checks did not improve
+the eligible primary metrics; the declared three-check early-stop rule has not
+fired.
 
 The release gate blocks weight publication until source hashes, measured E0/E1
 results, checkpoint smoke tests, attribution, and policy checks pass.

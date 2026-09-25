@@ -19,6 +19,7 @@ from masriswitch.train.plan import (
     plan_training,
     probe_frame_batch,
     review_validation_progress,
+    shortlist_validation_candidates,
 )
 from masriswitch.train.verify import verify_e1_stage
 
@@ -79,6 +80,18 @@ def test_validation_progress_stops_after_three_stale_evaluations() -> None:
     ]
     result = review_validation_progress(candidates, 0.35)
     assert result == {"best_index": 0, "stale_evaluations": 3, "stop_early": True}
+
+
+def test_shortlist_uses_eer_then_wer_and_arabic_guardrail() -> None:
+    candidates = [
+        {"english_eer": 0.31, "cs_wer": 0.44, "ar_cer": 0.35},
+        {"english_eer": 0.30, "cs_wer": 0.45, "ar_cer": 0.35},
+        {"english_eer": 0.30, "cs_wer": 0.43, "ar_cer": 0.35},
+        {"english_eer": 0.20, "cs_wer": 0.40, "ar_cer": 0.40},
+    ]
+    assert shortlist_validation_candidates(candidates, 0.35, limit=2) == [2, 1]
+    with pytest.raises(ValueError, match="No checkpoint"):
+        shortlist_validation_candidates(candidates, 0.01)
 
 
 def test_e1_stage_verification_rejects_eval_leakage() -> None:

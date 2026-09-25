@@ -21,12 +21,35 @@ def _pct(value: float) -> str:
     return f"{value * 100:.2f}%"
 
 
+def _training_status(train: dict[str, Any], progress: dict[str, Any]) -> str:
+    stages = progress.get("stages")
+    if not isinstance(stages, list) or not stages or not isinstance(stages[-1], dict):
+        raise ValueError("Training endpoint is unverified")
+    finished_updates = stages[-1].get("updates")
+    selected_updates = train.get("selected_updates")
+    if (
+        type(finished_updates) is not int
+        or type(selected_updates) is not int
+        or not 0 < selected_updates <= finished_updates <= 8000
+        or (finished_updates < 8000 and progress.get("stop_early") is not True)
+    ):
+        raise ValueError("Training endpoint or selected checkpoint updates are unverified")
+    status = (
+        f"Training reached {finished_updates:,} of 8,000 planned optimizer updates; "
+        f"the selected checkpoint is from update {selected_updates:,}."
+    )
+    if finished_updates < 8000:
+        status += " Training stopped after three stale validation checks."
+    return status
+
+
 def main() -> None:
     paths = Paths(Path.cwd())
     train = _read(paths.artifacts / "train_manifest.json")
     results = _read(paths.artifacts / "eval_metrics.json")
     audit = _read(paths.artifacts / "data_audit.json")
     selection = _read(paths.artifacts / "checkpoint_selection.json")
+    progress = _read(paths.artifacts / "e1_progress.json")
     e0, e1 = results.get("E0"), results.get("E1")
     sources = load_sources(paths.root / "configs/sources.yaml")
     source_ids = train.get("training_source_ids")
@@ -47,6 +70,7 @@ def main() -> None:
     ):
         raise ValueError("Measured, selected, release-safe E1 is required")
     m0, m1 = e0["metrics"], e1["metrics"]
+    training_status = _training_status(train, progress)
     lines = [
         "---",
         "license: apache-2.0",
@@ -79,6 +103,7 @@ def main() -> None:
         f"Selected checkpoint SHA256: `{train['checkpoint_sha256']}`. "
         "Checkpoint was chosen on validation prompts by English EER, "
         "then code-switch WER, with an overall Arabic CER guardrail.",
+        training_status,
         "Attribution: Abdelrahman R. Hashem, *Synthetic Arabic-English "
         "Code-Switched Speech for ASR* (2026). See `NOTICE` and the data audit.",
         "",

@@ -35,7 +35,7 @@ The complete private 489-prompt E0 evaluation produced finite 24 kHz audio
 ## M4 — Training
 - [x] Implement Kaggle T4x2 batch auto-probe + resumable state (`artifacts/train_probe.json`: 20 finite updates per rank at 5,600 frames/GPU, ≥5.76 GiB free; Kaggle private probe v5).
 - [x] Run 500-update pilot; verify checkpoint reload/inference (`artifacts/pilot_500_result.json`: both ranks reached 500 updates; 10 private inference prompts passed).
-- [ ] Run E1 to target 8k updates with periodic eval (1,000, 2,000, and 3,000-update checkpoints and 50-prompt validation measured; the 3,000-update check has one stale evaluation, below the three-evaluation early-stop threshold; bounded 4,000-update train/validation stage running).
+- [ ] Run E1 to target 8k updates with periodic eval (1,000 through 4,000-update checkpoints and 50-prompt validation measured; 3,000 and 4,000 were stale checks; corrected bounded 5,000-update stage running before the declared three-check early stop decision).
 - [ ] Select best E1 checkpoint by declared metric order.
 - [ ] If compute permits, run E2 with 10% Common Voice replay.
 
@@ -51,6 +51,15 @@ outputs (`artifacts/e1_validation_c3eac52f7456_metrics.json`). The prior
 notebook redirected training logs to a Kaggle file. The next-stage bundle adds
 minute-by-minute update logging, download progress, and a 20-minute SILMA
 model download cap.
+The 4,000-update stage also passed both-rank exact updates, audited train IDs,
+and ten private synthesis prompts (`artifacts/e1_4000_result.json`). Its
+50-prompt validation had zero invalid audio; English EER 34.74%, code-switch
+WER 44.03%, and overall Arabic CER 37.91%. This exceeds the 5% Arabic CER
+guardrail relative to the same E0 subset and is the second stale check.
+The first 5,000-update submission was cancelled before training because its
+resume URL and expected checkpoint hash did not match. A corrected private
+session (`tarekamr/masriswitch-e1-5000-corrected`) is running with the verified
+4,000-update checkpoint hash; no invalid-resume training occurred.
 
 ## M5 — Product
 - [ ] Build typed inference engine around best checkpoint.
