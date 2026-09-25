@@ -1,0 +1,7 @@
+experiment: E2
+seed: 42
+updates: 8000
+learning_rate: 0.00001
+common_voice_replay_fraction: 0.1
+save_every: 500
+eval_every: 1000

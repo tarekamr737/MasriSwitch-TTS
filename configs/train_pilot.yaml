@@ -1,0 +1,8 @@
+experiment: E1-pilot
+seed: 42
+updates: 500
+subset_fraction: 0.1
+learning_rate: 0.00001
+save_every: 250
+eval_prompts: 50
+frame_batch_candidates: [5600, 4800, 4000, 3200]

@@ -1,0 +1,8 @@
+seed: 42
+sample_rate: 24000
+duration_min: 0.8
+duration_max: 20.0
+clip_ratio_max: 0.001
+silence_ratio_max: 0.35
+split: [0.9, 0.05, 0.05]
+release_safe: true

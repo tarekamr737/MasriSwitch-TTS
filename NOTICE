@@ -1,0 +1,14 @@
+MasriSwitch-TTS
+Copyright 2026 MasriSwitch-TTS contributors.
+
+Base model: SILMA TTS v1, SILMA AI, Apache-2.0 weights.
+https://huggingface.co/silma-ai/silma-tts
+F5-TTS 1.1.7, SWivid, MIT code. https://github.com/SWivid/F5-TTS
+
+Eligible D1 data: Synthetic Arabic-English Code-Switched Speech for ASR,
+Abdelrahman R. Hashem, CC BY 4.0 for row-level author-created subset only.
+https://huggingface.co/datasets/abdo1819/arabic-english-code-switching-synthetic-asr
+The ArE-CSTD-derived rows are excluded from release-safe training.
+
+Generated audio must be disclosed as AI-generated. Custom voice use requires
+documented speaker consent.

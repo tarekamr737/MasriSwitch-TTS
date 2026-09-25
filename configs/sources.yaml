@@ -1,0 +1,49 @@
+sources:
+  f5_tts:
+    kind: code
+    repo: SWivid/F5-TTS
+    revision: c96c3aeed84f5e02aa54dc42c1193537ead39837
+    tag: 1.1.7
+    license: mit
+    release_safe: true
+  silma:
+    kind: model
+    repo: silma-ai/silma-tts
+    revision: 226dd7a65cadf51f9a6dbe3953fc89003b3844d5
+    license: apache-2.0
+    release_safe: true
+    expected_sha256: f43256d0b78b8803c638aed0875da5a4b372b4a784690a0156e5baff14f7336c
+  vocos:
+    kind: model
+    repo: charactr/vocos-mel-24khz
+    revision: 0feb3fdd929bcd6649e0e7c5a688cf7dd012ef21
+    license: mit
+    release_safe: true
+    expected_sha256: 97ec976ad1fd67a33ab2682d29c0ac7df85234fae875aefcc5fb215681a91b2a
+  d1:
+    kind: dataset
+    repo: abdo1819/arabic-english-code-switching-synthetic-asr
+    config: synthetic
+    revision: eae9a87c17e91e3f59a9696d5f4ff3eb51502e82
+    row_license: cc-by-4.0
+    expected_rows: 3944
+    release_safe: true
+  common_voice_ar:
+    kind: dataset
+    repo: mozilla-foundation/common_voice_27_0
+    revision: TBD
+    license: cc0-1.0
+    release_safe: false
+    enabled: false
+  are_cstd:
+    kind: dataset
+    repo: SDAIANCAI/Ar-En-Code-Switching-Textual-Dataset
+    license: cc-by-nc-sa-4.0
+    release_safe: false
+    enabled: false
+  egyspeak:
+    kind: dataset
+    repo: MohamedGomaa30/EGYSpeak
+    license: unknown-provenance
+    release_safe: false
+    enabled: false

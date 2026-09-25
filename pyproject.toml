@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "masriswitch-tts"
+version = "0.1.0"
+description = "Reproducible Egyptian Arabic and English code-switched TTS"
+requires-python = ">=3.10,<3.13"
+license = {text = "Apache-2.0"}
+dependencies = [
+  "PyYAML==6.0.2",
+  "huggingface-hub==0.35.3",
+  "hf-xet==1.4.3",
+  "numpy==1.26.4",
+  "soundfile==0.13.1",
+]
+
+[project.optional-dependencies]
+data = ["datasets==3.6.0", "librosa==0.11.0", "scipy==1.15.3"]
+train = ["f5-tts==1.1.7", "accelerate==1.10.1", "torch==2.6.0", "torchaudio==2.6.0", "transformers==4.46.3"]
+eval = ["jiwer==4.0.0", "rapidfuzz==3.14.1", "faster-whisper==1.2.0"]
+serve = ["fastapi==0.116.1", "uvicorn==0.35.0", "gradio==5.35.0"]
+dev = ["pytest==8.4.2", "ruff==0.13.1", "mypy==1.18.2", "types-PyYAML==6.0.12.20250809"]
+
+[project.scripts]
+masriswitch = "masriswitch.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["masriswitch"]
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+cache_dir = "artifacts/pytest-cache"
+addopts = "--basetemp=artifacts/pytest-tmp"

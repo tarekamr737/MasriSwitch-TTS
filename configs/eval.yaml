@@ -1,0 +1,10 @@
+seed: 42
+sample_rate: 24000
+locked_test_prompts: 300
+asr_model: dropbox-dash/faster-whisper-large-v3-turbo
+asr_base_model: openai/whisper-large-v3-turbo
+asr_revision: 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf
+asr_model_sha256: e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da
+speaker_model: TBD
+reference_audio: TBD
+reference_text: TBD
