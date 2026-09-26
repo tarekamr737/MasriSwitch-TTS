@@ -44,6 +44,8 @@ def build_bundle(root: Path, output: Path, stage: str = "e1") -> dict[str, objec
             root / "artifacts" / "e0_eval_plan.jsonl",
             root / "artifacts" / "e0_eval_plan_manifest.json",
         ]
+    if stage == "eval":
+        paths.append(root / "scripts" / "kaggle_product_smoke.py")
     if any(not path.is_file() for path in paths):
         raise FileNotFoundError("Required source, config, audit, or vocab is missing")
     output.parent.mkdir(parents=True, exist_ok=True)

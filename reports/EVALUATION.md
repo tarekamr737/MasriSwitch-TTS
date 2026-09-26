@@ -1,7 +1,7 @@
 # Evaluation
 
 Status: E0 completed on 489 prompts with a pinned independent ASR evaluator;
-E1 comparison and checkpoint selection: TBD. See `reports/BASELINE.md` for the
+E1 final comparison: TBD; update 2,000 was selected on validation. See `reports/BASELINE.md` for the
 full E0 protocol, group tables, timing, and limitations.
 
 | Model | Code-switch WER (412) | English EER | Arabic-only CER (77) |
@@ -40,3 +40,23 @@ At 4,000 updates, English EER was 34.74%, code-switch WER 44.03%, and overall
 Arabic CER 37.91%, with zero invalid outputs. The Arabic CER fails the 5%
 relative guardrail on these 50 validation prompts. This is the second stale
 check under the predeclared early-stop rule.
+At 5,000 updates, English EER was 32.63%, code-switch WER 44.18%, and overall
+Arabic CER 37.01%, with zero invalid outputs. EER only tied the previous best,
+WER worsened, and Arabic CER again failed the guardrail. This third stale check
+stopped training at 5,000 updates. The frozen 50-prompt short list advances
+the 1,000-, 2,000-, and 3,000-update checkpoints to all 189 validation prompts.
+
+## Completed checkpoint selection
+
+| Updates | Validation English EER | Code-switch WER | Overall Arabic CER |
+|---|---:|---:|---:|
+| 1,000 | 37.38% | 45.87% | 37.29% |
+| **2,000 (selected)** | **36.39%** | **45.47%** | **37.23%** |
+| 3,000 | 37.13% | 45.44% | 37.73% |
+
+All candidates passed the full-validation Arabic CER threshold of 38.17%.
+The 2,000-update checkpoint has the lowest English EER, the first declared
+selection metric. Its SHA256 is
+`558e2ab53e1b5450bcd1a1c30683a1b3e6be1234b7e198b74209f362693eaf92`.
+Each candidate produced 189 valid outputs. The locked benchmark comparison
+is running separately; no locked results were available for selection.

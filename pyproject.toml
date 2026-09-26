@@ -44,6 +44,6 @@ check_untyped_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = [".", "src"]
 cache_dir = "artifacts/pytest-cache"
 addopts = "--basetemp=artifacts/pytest-tmp"

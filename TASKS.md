@@ -5,7 +5,7 @@ Execute top-to-bottom. Keep each item tiny; mark `[x]` only with evidence.
 ## M0 — Scaffold
 - [x] Create package/layout, `pyproject.toml`, Makefile, LICENSE, NOTICE, `.gitignore`, `.env.example` (files present).
 - [x] Add config schemas + CLI skeleton (`masriswitch validate-config` passed).
-- [x] Add ruff/mypy/pytest and make `make check` green (equivalent venv commands passed: ruff, mypy, 127 tests, config validation; GNU make is unavailable on this Windows host).
+- [x] Add ruff/mypy/pytest and make `make check` green (equivalent venv commands passed: ruff, mypy, 138 tests, config validation; GNU make is unavailable on this Windows host).
 
 ## M1 — Sources + data
 - [x] Implement source registry + fail-closed license gate (`tests/test_pipeline.py`).
@@ -35,8 +35,8 @@ The complete private 489-prompt E0 evaluation produced finite 24 kHz audio
 ## M4 — Training
 - [x] Implement Kaggle T4x2 batch auto-probe + resumable state (`artifacts/train_probe.json`: 20 finite updates per rank at 5,600 frames/GPU, ≥5.76 GiB free; Kaggle private probe v5).
 - [x] Run 500-update pilot; verify checkpoint reload/inference (`artifacts/pilot_500_result.json`: both ranks reached 500 updates; 10 private inference prompts passed).
-- [ ] Run E1 to target 8k updates with periodic eval (1,000 through 4,000-update checkpoints and 50-prompt validation measured; 3,000 and 4,000 were stale checks; corrected bounded 5,000-update stage running before the declared three-check early stop decision).
-- [ ] Select best E1 checkpoint by declared metric order.
+- [x] Run E1 to target 8k updates with periodic eval (the declared three-stale-check early stop fired at 5,000 updates; all 1,000 through 5,000-update stages and their 50-prompt validations were verified in `artifacts/e1_progress.json`).
+- [x] Select best E1 checkpoint by declared metric order (`artifacts/checkpoint_selection.json`: update 2,000 won the complete 189-prompt validation comparison; locked benchmark excluded).
 - [ ] If compute permits, run E2 with 10% Common Voice replay.
 
 E2 is held at the source gate: `common_voice_ar` is disabled and its exact
@@ -58,14 +58,25 @@ WER 44.03%, and overall Arabic CER 37.91%. This exceeds the 5% Arabic CER
 guardrail relative to the same E0 subset and is the second stale check.
 The first 5,000-update submission was cancelled before training because its
 resume URL and expected checkpoint hash did not match. A corrected private
-session (`tarekamr/masriswitch-e1-5000-corrected`) is running with the verified
-4,000-update checkpoint hash; no invalid-resume training occurred.
+session (`tarekamr/masriswitch-e1-5000-corrected`) completed with the verified
+4,000-update checkpoint hash; no invalid-resume training occurred. The 5,000
+checkpoint also passed exact updates on both ranks, audited train IDs, and ten
+private synthesis prompts. Its 50-prompt English EER was 32.63%, code-switch
+WER 44.18%, and overall Arabic CER 37.01%; the Arabic guardrail failed. The
+third stale validation triggered the stop rule. Full 189-prompt validation of
+the frozen 1,000/2,000/3,000 short list completed. The 2,000-update checkpoint
+won by English EER (36.39%), followed by code-switch WER (45.47%); overall
+Arabic CER (37.23%) passed the relative 5% guardrail. Full metrics have the
+`_189_metrics.json` suffix; the original 50-prompt screening files are preserved.
+The selected checkpoint is downloading directly to D. Final 489-prompt
+evaluation and a bounded private API/Gradio smoke are running in
+`tarekamr/masriswitch-e1-final-489-product-smoke` (source verified after save).
 
 ## M5 — Product
 - [ ] Build typed inference engine around best checkpoint.
 - [ ] Add FastAPI health/model-info/normalize/synthesize.
 - [ ] Add minimal Gradio demo with fixed approved reference voice.
-- [ ] Add Dockerfile/local run instructions only if they stay lightweight.
+- [x] Add lightweight local run instructions (`README.md`: API/demo commands, D-drive caches, and approved-reference configuration).
 
 ## M6 — Evaluation + release
 - [ ] Run final locked evaluation E0 vs E1 (+E2 if available).
@@ -80,3 +91,7 @@ session (`tarekamr/masriswitch-e1-5000-corrected`) is running with the verified
 GitHub publication is currently gated by an invalid local `gh` token for
 `tarekamr737` (`gh auth status`, 2026-09-25). Code and release artifacts can
 continue to be prepared on D before authentication is renewed.
+Local Hugging Face CLI authentication is also absent (`hf auth whoami`,
+2026-09-26). The connector remains available for small Hub files, but uploading
+the selected 2.6 GB checkpoint requires local write credentials. A request to
+authenticate with `HF_HOME` on D is pending; no tokens should be pasted in chat.

@@ -26,6 +26,20 @@ def _evidence(root: Path) -> tuple[Paths, Path, Path]:
     (paths.artifacts / "checkpoint_selection.json").write_text(
         json.dumps({"selected_checkpoint_sha256": checkpoint_sha}), encoding="utf-8"
     )
+    (paths.artifacts / "e1_progress.json").write_text(
+        json.dumps(
+            {
+                "stages": [
+                    {"updates": 1000, "checkpoint_sha256": checkpoint_sha},
+                    {"updates": 5000, "checkpoint_sha256": "f" * 64},
+                ],
+                "stop_early": True,
+                "stale_evaluations": 3,
+                "locked_benchmark_used": False,
+            }
+        ),
+        encoding="utf-8",
+    )
     result = paths.artifacts / "e1_1000_result.json"
     result.write_text(
         json.dumps(
@@ -54,6 +68,10 @@ def test_finalize_selected_checkpoint_binds_local_bytes(tmp_path: Path) -> None:
     manifest = finalize_training_manifest(paths, result, checkpoint)
     assert manifest["best_checkpoint"] == str(checkpoint.resolve())
     assert manifest["selected_updates"] == 1000
+    assert manifest["complete"] is True
+    assert manifest["selected_stage_reached_target"] is False
+    assert manifest["training_endpoint_updates"] == 5000
+    assert manifest["stopped_early"] is True
     assert len(manifest["training_sample_ids"]) == 3414
     assert json.loads((paths.artifacts / "train_manifest.json").read_text()) == manifest
 
@@ -73,3 +91,15 @@ def test_finalize_rejects_nonselected_stage(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="metric-based checkpoint selection"):
         finalize_training_manifest(paths, result, checkpoint)
+
+
+@pytest.mark.parametrize("field,value", [("stop_early", False), ("stale_evaluations", 2)])
+def test_finalize_rejects_unfinished_training(tmp_path: Path, field: str, value: object) -> None:
+    paths, result, checkpoint = _evidence(tmp_path)
+    progress_path = paths.artifacts / "e1_progress.json"
+    progress = json.loads(progress_path.read_text())
+    progress[field] = value
+    progress_path.write_text(json.dumps(progress))
+    with pytest.raises(ValueError, match="early stop is unverified"):
+        finalize_training_manifest(paths, result, checkpoint)
+    assert not (paths.artifacts / "train_manifest.json").exists()

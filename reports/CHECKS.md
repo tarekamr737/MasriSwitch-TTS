@@ -3,8 +3,8 @@
 Local Windows virtual environment: Python 3.10.20 in `D:\MasriSwitch-TTS\artifacts\python`.
 Dependencies and caches are under `D:\MasriSwitch-TTS`.
 
-2026-09-25: `ruff format --check src tests scripts`, `ruff check src tests scripts`,
-`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 136 tests.
+2026-09-26: `ruff format --check src tests scripts`, `ruff check src tests scripts`,
+`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 138 tests.
 The added inference tests verify that a private reference and a path escaping
 `artifacts/reference` cannot enable public synthesis.
 The disabled Gradio demo constructed successfully (`Blocks`, six components).
@@ -17,6 +17,20 @@ path in `training_args.json`; the bundled model bytes remain hash-checked.
 The model card renderer now states both the actual training endpoint and the
 selected checkpoint update, and requires verified early-stop evidence if the
 run ends before 8,000 updates.
+Direct `pytest` initially failed to import the script namespace; including the
+repository root in pytest's configured Python path fixed collection. All 138
+tests then passed (one upstream Starlette deprecation warning).
+The training finalizer now requires verified completion or the declared early
+stop and records the endpoint separately from the selected checkpoint update.
+Two added cases reject premature early-stop evidence.
+The complete 189-prompt validation produced zero invalid audio for each of
+the 1,000/2,000/3,000 checkpoints. The declared metric order selected update
+2,000 (`artifacts/checkpoint_selection.json`). A final private 489-prompt
+evaluation and ten-request FastAPI/one-callback Gradio smoke were submitted
+with bundle SHA256
+`a3c184c3a9167b724633d61917b085345a56a766cdddb1e1a4b4f608051b4c0a`.
+The stored Kaggle source matched the submitted source. Their results are
+pending; no public voice approval was granted by these private checks.
 GNU make is not installed
 on this host, so the equivalent commands in the Makefile were run directly.
 
@@ -63,6 +77,16 @@ ten-prompt private checkpoint checks. Its checkpoint SHA256 is
 All 50 validation outputs were valid. English EER was 34.74%, code-switch WER
 44.03%, and overall Arabic CER 37.91%; the Arabic guardrail fails on this
 subset. The early-stop review now records two consecutive stale checks.
+The corrected 5,000-update stage completed both rank updates exactly,
+verified all 3,414 train IDs, and passed ten private checkpoint prompts. Its
+checkpoint SHA256 is
+`cbf88438a12360e18ba81ef960a0cb0cf6eea803b1cbbc3c134f9b1693b07e11`.
+All 50 validation outputs were valid; English EER was 32.63%, code-switch WER
+44.18%, and overall Arabic CER 37.01%. This was the third stale check and
+triggered the declared early stop at 5,000 updates. The first misconfigured
+5,000 submission was cancelled before training; its resume URL and hash did
+not match. The corrected submission's resume hash matched the verified 4,000
+checkpoint.
 
 Kaggle CPU Python 3.10.20 environment imported F5-TTS 1.1.7, PyTorch
 2.6.0+cu124, torchaudio 2.6.0, Transformers 4.46.3, Accelerate 1.15.0,
