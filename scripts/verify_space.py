@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import time
@@ -14,8 +15,12 @@ from gradio_client import Client
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--long-text", action="store_true")
+    args = parser.parse_args()
     root = Path(__file__).resolve().parents[1] / "artifacts"
-    target = root / "space_smoke"
+    name = "space_long_text_smoke" if args.long_text else "space_smoke"
+    target = root / name
     target.mkdir(exist_ok=True)
     url = "https://tarek737-masriswitch-tts-demo.hf.space"
     response = requests.get(url + "/config", timeout=30)
@@ -28,6 +33,10 @@ def main() -> None:
     )
     client = Client(url, hf_token=False, download_files=str(target), verbose=False)
     prompt = "راجع ال account معايا."
+    if args.long_text:
+        prompt = json.loads((root / "long_text_diagnostic.json").read_text(encoding="utf-8"))[
+            "original"
+        ]
     start = time.perf_counter()
     job = client.submit(prompt, api_name="/synthesize")
     result = job.result(timeout=180)
@@ -50,7 +59,7 @@ def main() -> None:
         "runtime_gradio_version": config["version"],
         "requests": 1,
     }
-    (root / "space_smoke.json").write_text(
+    (root / f"{name}.json").write_text(
         json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(json.dumps(evidence, ensure_ascii=True))

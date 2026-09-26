@@ -128,3 +128,24 @@ incompatibility; the training extra now pins the previously working datasets
 No extra training was started. The accuracy target remains unmet; the next
 quality decision needs listening feedback on new demo inputs. The original
 locked benchmark and selected checkpoint are unchanged.
+
+## Follow-up — Long-sentence degradation
+
+- [x] Reproduce the chunking failure on the user's 192-character challenge:
+  normalization expands it to 259 characters / 416 UTF-8 bytes; the upstream
+  splitter ignores Arabic commas and emits one chunk above its 256-byte budget.
+- [x] Add Arabic-aware punctuation splitting with a strict UTF-8 word-boundary
+  fallback, six-second estimated chunk budget, and ordered audio assembly.
+- [x] Verify the bounded before/after inference comparison and update the Space
+  (same model/reference/seed, 16 steps; five chunks; live anonymous long-sentence
+  request passed; `artifacts/long_text_probe.json`, `artifacts/space_long_text_smoke.json`).
+
+The inference-only private probe `tarekamr/masriswitch-long-text-probe` compares
+the exact reported sentence with unchanged model, approved reference, seed,
+and 16 inference steps. No locked benchmark or training data is used.
+The automated comparison recovered the ending more clearly but aggregate
+metrics were mixed; no global quality improvement is claimed. The optional
+32-step follow-up has no result yet; Kaggle reported its two-batch-session
+limit. The live demo retains the tested 16-step setting. Listening feedback
+on the updated sentence is pending; underlying model pronunciation remains
+experimental. No additional training was started.

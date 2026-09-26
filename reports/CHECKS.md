@@ -3,6 +3,19 @@
 Local Windows virtual environment: Python 3.10.20 in `D:\MasriSwitch-TTS\artifacts\python`.
 Dependencies and caches are under `D:\MasriSwitch-TTS`.
 
+Long-text follow-up: 165 tests pass. New cases cover Arabic comma boundaries,
+byte limits after number expansion, unpunctuated input, intact decimal/time
+tokens, oversized-word rejection, and ordered assembly of every generated piece.
+Format/lint, types (38 modules), and config validation also pass. The private
+two-generation probe reproduced the oversized chunk and verified finite audio
+with bounded chunking; automatic quality results are mixed, as documented in
+`QUALITY_REVIEW.md`. The fix is live at Space commit
+`2c34711b41a388e41a311ee4827944f00ed82cc5`; the user's exact long prompt passed
+an anonymous public request (21.984 seconds of 24 kHz audio, request 7.888 s).
+`artifacts/space_long_text_smoke.json` binds the saved WAV to that request.
+The optional 32-step probe is pending due to Kaggle's batch-session limit;
+the live inference setting remains 16. No additional training was started.
+
 Public deployment follow-up, 2026-09-26: 159 unit tests passed, plus format,
 lint, types, and config validation. The five affected validation inputs now
 preserve ordinary English words; eleven regression tests protect ID parsing.

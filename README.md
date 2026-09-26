@@ -215,6 +215,10 @@ click **Generate speech**, wait for the free GPU queue, and play/download the WA
 Try `ال order جاهز للتوصيل.` or `ممكن تعمل reset لل password؟`.
 Audio is AI-generated using a fixed, consented voice. Pronunciation and numbers
 can be wrong; the model is experimental. Free GPU quotas apply.
+Long sentences are split at Arabic/English punctuation and safe word boundaries
+after numbers are expanded, reducing oversized single-generation segments.
+This repairs long-text handling; it does not establish that the fine-tuned
+model meets its original accuracy target.
 
 The Space uses PyTorch/torchaudio 2.8.0 for ZeroGPU compatibility; benchmark
 results were measured with 2.6.0. `deploy/space/` contains the pinned runtime

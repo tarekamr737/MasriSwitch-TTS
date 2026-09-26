@@ -10,9 +10,11 @@ from pathlib import Path
 from typing import Protocol
 
 import numpy as np
+import soundfile as sf
 
 from masriswitch.config import Paths, load_yaml
 from masriswitch.data.audit import sha256_file
+from masriswitch.infer.chunks import speech_chunks
 from masriswitch.text.normalize import normalize_text
 
 
@@ -96,6 +98,10 @@ class F5Engine:
         self.seed = seed
         self.nfe_steps = nfe_steps
         self._device = device
+        duration = sf.info(files.reference_audio).duration
+        if not 0 < duration < 12:
+            raise ValueError("Reference duration must be between zero and twelve seconds")
+        self._chunk_bytes = min(160, int(len(files.reference_text.encode("utf-8")) / duration * 6))
         from f5_tts.infer.utils_infer import infer_process, load_model, load_vocoder
         from f5_tts.model import DiT
 
@@ -119,24 +125,36 @@ class F5Engine:
         if len(text) > 500:
             raise ValueError("Text must contain at most 500 characters")
         normalized = normalize_text(text).normalized_text
-        random.seed(self.seed)
-        np.random.seed(self.seed)
+        chunks = speech_chunks(normalized, max_bytes=self._chunk_bytes)
         import torch
 
-        torch.manual_seed(self.seed)
-        audio, sample_rate, _ = self._infer_process(
-            str(self.files.reference_audio),
-            self.files.reference_text,
-            normalized,
-            self._model,
-            self._vocoder,
-            nfe_step=self.nfe_steps,
-            cross_fade_duration=0,
-            **({"device": self._device} if self._device else {}),
-        )
-        if audio is None or not np.isfinite(audio).all() or len(audio) == 0:
-            raise RuntimeError("Synthesis returned invalid audio")
-        return np.asarray(audio, dtype=np.float32), int(sample_rate)
+        waves: list[np.ndarray] = []
+        sample_rate = 24000
+        for index, chunk in enumerate(chunks):
+            random.seed(self.seed)
+            np.random.seed(self.seed)
+            torch.manual_seed(self.seed)
+            audio, rate, _ = self._infer_process(
+                str(self.files.reference_audio),
+                self.files.reference_text,
+                chunk,
+                self._model,
+                self._vocoder,
+                nfe_step=self.nfe_steps,
+                cross_fade_duration=0,
+                **({"device": self._device} if self._device else {}),
+            )
+            if (
+                audio is None
+                or not np.isfinite(audio).all()
+                or len(audio) == 0
+                or int(rate) != sample_rate
+            ):
+                raise RuntimeError("Synthesis returned invalid audio")
+            if index:
+                waves.append(np.zeros(int(sample_rate * 0.12), dtype=np.float32))
+            waves.append(np.asarray(audio, dtype=np.float32))
+        return np.concatenate(waves), sample_rate
 
 
 def sha256_bytes(blob: bytes) -> str:

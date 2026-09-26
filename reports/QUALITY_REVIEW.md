@@ -46,3 +46,48 @@ before deployment (`artifacts/space_resolved.txt`); model code is unchanged.
 An anonymous live request containing `account` passed with finite nonzero
 24 kHz audio (`artifacts/space_smoke.json`). This confirms the serving path
 works after the correction; pronunciation quality still needs listening.
+
+## Reported long-sentence degradation
+
+The user reported reasonable speech at the start of the 192-character challenge
+and severe degradation later. After normalization this prompt is 259 characters
+and 416 UTF-8 bytes. The pinned upstream splitter ignores Arabic commas and
+does not split an oversized clause at word boundaries. It therefore emits one
+416-byte chunk despite its 256-byte budget, estimating about 22 seconds of new
+speech plus the 8.4935-second reference.
+
+The serving correction recognizes Arabic punctuation and enforces a byte limit
+even without punctuation. The limit is the smaller of 160 bytes and six seconds
+estimated from the fixed reference's speaking rate (113 bytes for this voice).
+The challenge becomes five pieces; all words are preserved, and the generated
+pieces are joined in order with 120 ms pauses. The six-second estimate is a
+length heuristic, not a measured phoneme-duration guarantee.
+
+A private two-generation comparison used the same published checkpoint,
+approved voice, seed 42, PyTorch 2.8.0, and 16 inference steps. Both WAV hashes
+were verified after download to D (`artifacts/long_text_probe.json`).
+
+| One reported prompt only | Legacy | Chunked, 16 steps |
+|---|---:|---:|
+| Arabic-decoder WER | 80.85% | 76.60% |
+| Arabic character error | 59.87% | 66.24% |
+| English entity error | 25.00% | 25.00% |
+| Generated seconds | 21.792 | 21.984 |
+| Synthesis seconds, T4 | 4.761 | 6.271 |
+
+The split version's transcript recovers the final instruction about trying
+another credit card, but aggregate proxy results are mixed and ID/time errors
+remain. Forced Arabic transcription often renders English words in Arabic
+letters and spoken numbers as digits. These are diagnostic results, not a new
+benchmark or proof of improved naturalness. A single additional chunked pass
+at the upstream default of 32 steps is pending; the legacy baseline is reused.
+Kaggle reported its maximum two-batch-GPU-session limit on a retry. No 32-step
+result is available, and that setting was not promoted.
+
+The verified 16-step repair was deployed at Space commit
+`2c34711b41a388e41a311ee4827944f00ed82cc5`. An anonymous request for the exact
+reported sentence produced a finite nonzero 24 kHz WAV lasting 21.984 seconds,
+with 7.888 seconds total request time (one measurement including queue/network).
+Remote engine/chunker hashes and the downloaded WAV hash were verified.
+The fresh live audio is recorded in `artifacts/space_long_text_smoke.json`.
+User listening assessment is pending; the model remains experimental.
