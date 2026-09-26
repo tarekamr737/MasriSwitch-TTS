@@ -23,7 +23,10 @@ _PATTERNS = [
     ("percentage", re.compile(r"(?<!\d)\d+(?:[.,]\d+)?\s*%")),
     ("measurement", re.compile(r"(?<!\d)\d+(?:[.,]\d+)?\s*(?:kg|km|cm|GB|MB)\b", re.I)),
     ("acronym", re.compile(r"(?<![A-Za-z])(?:OTP|Wi-Fi|API|AI|URL|SMS|USB)(?![A-Za-z])", re.I)),
-    ("id", re.compile(r"\b(?:ORD|ACC|ID)[-_]?[A-Z0-9]{3,}\b", re.I)),
+    (
+        "id",
+        re.compile(r"\b(?:ORD|ACC|ID)(?:[-_][A-Z0-9]{3,}|(?=[A-Z0-9]*\d)[A-Z0-9]{3,})\b", re.I),
+    ),
     (
         "brand",
         re.compile(

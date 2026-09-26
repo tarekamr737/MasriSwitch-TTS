@@ -3,6 +3,24 @@
 Local Windows virtual environment: Python 3.10.20 in `D:\MasriSwitch-TTS\artifacts\python`.
 Dependencies and caches are under `D:\MasriSwitch-TTS`.
 
+Public deployment follow-up, 2026-09-26: 159 unit tests passed, plus format,
+lint, types, and config validation. The five affected validation inputs now
+preserve ordinary English words; eleven regression tests protect ID parsing.
+Four hosting tests enforce consent, exact audio hashes, and complete secret
+parts. `artifacts/space_resolved.txt` records the resolved Linux dependencies.
+The live Space is `https://huggingface.co/spaces/Tarek737/MasriSwitch-TTS-Demo`,
+running on free `zero-a10g` hardware at commit
+`c3ead23a37982c9946025cc73fee239109ffcfea`.
+One anonymous public request generated 1.717 seconds of finite nonzero 24 kHz
+audio in 5.175 seconds including network/queue overhead. This is a single
+operational measurement, not a latency benchmark or pronunciation judgment.
+`artifacts/space_smoke.json` records the request and saved WAV hash. Runtime
+secrets hold the fixed voice; public repo files contain no audio/checkpoints.
+The Space uses Gradio 5.25.2 and PyTorch/torchaudio 2.8.0. Original published
+evaluation results are unchanged; no additional training was started.
+The build initially exposed (and then resolved) source-copy ordering and the
+Gradio MCP extra/Pydantic conflict. These failures occurred before inference.
+
 2026-09-26: `ruff format --check src tests scripts`, `ruff check src tests scripts`,
 `mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 144 tests.
 Four additional cases verify approved smoke-reference acceptance and rejection

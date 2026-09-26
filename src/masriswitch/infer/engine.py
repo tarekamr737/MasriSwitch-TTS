@@ -87,18 +87,24 @@ def approved_engine_files(paths: Paths) -> EngineFiles:
 
 
 class F5Engine:
-    def __init__(self, files: EngineFiles, *, seed: int = 42, nfe_steps: int = 16) -> None:
+    def __init__(
+        self, files: EngineFiles, *, seed: int = 42, nfe_steps: int = 16, device: str | None = None
+    ) -> None:
         files.validate()
         self.model_id = files.model_id
         self.files = files
         self.seed = seed
         self.nfe_steps = nfe_steps
+        self._device = device
         from f5_tts.infer.utils_infer import infer_process, load_model, load_vocoder
         from f5_tts.model import DiT
 
         self._infer_process = infer_process
         config = load_yaml(files.silma_config)
-        self._vocoder = load_vocoder("vocos", is_local=True, local_path=str(files.vocoder_dir))
+        device_options = {"device": device} if device else {}
+        self._vocoder = load_vocoder(
+            "vocos", is_local=True, local_path=str(files.vocoder_dir), **device_options
+        )
         self._model = load_model(
             DiT,
             config["model"]["arch"],
@@ -106,9 +112,12 @@ class F5Engine:
             mel_spec_type="vocos",
             vocab_file=str(files.vocab),
             use_ema=True,
+            **device_options,
         )
 
     def synthesize(self, text: str) -> tuple[np.ndarray, int]:
+        if len(text) > 500:
+            raise ValueError("Text must contain at most 500 characters")
         normalized = normalize_text(text).normalized_text
         random.seed(self.seed)
         np.random.seed(self.seed)
@@ -123,6 +132,7 @@ class F5Engine:
             self._vocoder,
             nfe_step=self.nfe_steps,
             cross_fade_duration=0,
+            **({"device": self._device} if self._device else {}),
         )
         if audio is None or not np.isfinite(audio).all() or len(audio) == 0:
             raise RuntimeError("Synthesis returned invalid audio")

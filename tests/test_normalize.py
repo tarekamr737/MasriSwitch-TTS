@@ -2,7 +2,32 @@
 
 import pytest
 
+from masriswitch.text.entities import parse_entities
 from masriswitch.text.normalize import normalize_text
+
+
+@pytest.mark.parametrize(
+    "word",
+    [
+        "account",
+        "access",
+        "accuracy",
+        "accumulation",
+        "identification",
+        "idiosyncratic",
+        "ordinary",
+    ],
+)
+def test_ordinary_english_words_are_not_spelled_as_ids(word: str) -> None:
+    text = f"راجع ال {word} معايا."
+    assert normalize_text(text).normalized_text == text
+    assert all(entity.kind != "id" for entity in parse_entities(text))
+
+
+@pytest.mark.parametrize("identifier", ["ORD123", "acc456", "ID-ABC", "ACC_AB12"])
+def test_explicit_ids_remain_recognized(identifier: str) -> None:
+    assert parse_entities(identifier)[0].kind == "id"
+
 
 GOLDEN = [
     ("0", "صفر"),

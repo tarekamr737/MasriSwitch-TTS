@@ -207,6 +207,25 @@ ignored `artifacts/release_bundle/` for review and upload.
 
 ## Local API and demo
 
+### Browser demo
+
+Open [MasriSwitch-TTS Demo](https://huggingface.co/spaces/Tarek737/MasriSwitch-TTS-Demo).
+When its status is Running, enter a short sentence (up to 200 characters),
+click **Generate speech**, wait for the free GPU queue, and play/download the WAV.
+Try `ال order جاهز للتوصيل.` or `ممكن تعمل reset لل password؟`.
+Audio is AI-generated using a fixed, consented voice. Pronunciation and numbers
+can be wrong; the model is experimental. Free GPU quotas apply.
+
+The Space uses PyTorch/torchaudio 2.8.0 for ZeroGPU compatibility; benchmark
+results were measured with 2.6.0. `deploy/space/` contains the pinned runtime
+and app. `scripts/deploy_space.py --dry-run` builds an allowlisted source bundle;
+deployment requires `HF_TOKEN` and the local approved reference. Voice bytes are
+stored as runtime secrets and are never uploaded as repository files.
+See [quality review](reports/QUALITY_REVIEW.md) for the corrected ID-normalization
+bug and the decision to gather listening feedback before another training run.
+
+### Local setup
+
 Install the serving and inference dependencies into the Python 3.10 environment:
 
 ```bash

@@ -113,3 +113,18 @@ the new approved voice passed in release-smoke v2. Version 1 verified all
 13 published files but failed before synthesis on a datasets/pyarrow import
 incompatibility; the training extra now pins the previously working datasets
 3.6.0 version. No additional training is needed.
+
+## Follow-up — Public hosting and quality review
+
+- [x] Prepare a free ZeroGPU Space with pinned model/vocoder hashes, fixed voice
+  supplied as secrets, bounded queue, 200-character limit, and AI disclosure.
+- [x] Verify live public generation at `Tarek737/MasriSwitch-TTS-Demo`
+  (`artifacts/space_smoke.json`: anonymous request passed; finite nonzero
+  24 kHz WAV; 1.717 seconds of audio; 5.175 seconds including queue/network).
+- [x] Inspect validation text handling and fix false ID recognition that spelled
+  ordinary English words letter by letter (five validation rows affected;
+  eleven regression cases; `reports/QUALITY_REVIEW.md`).
+
+No extra training was started. The accuracy target remains unmet; the next
+quality decision needs listening feedback on new demo inputs. The original
+locked benchmark and selected checkpoint are unchanged.
