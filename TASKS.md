@@ -90,18 +90,19 @@ CER 38.03%. Reports and the model card disclose the experimental outcome.
 - [x] Create GitHub README with exact reproduce/Kaggle commands (fresh probe stages tested; measured final table included).
 - [x] Generate HF model card, benchmark data card, NOTICE/attributions (model card generated from measured artifacts; benchmark card already published).
 - [x] Publish text-only benchmark (`https://huggingface.co/datasets/Tarek737/MasriSwitch-Bench`; downloaded SHA256 matched local manifest; `artifacts/hf_benchmark_release.json`).
-- [ ] Publish weights only if release gate passes.
+- [x] Publish weights only if release gate passes (`Tarek737/MasriSwitch-TTS`, commit `de6cd6819e719876909437cc33ca7086cff369c9`; remote checkpoint SHA256 matches the selected model).
 - [ ] Smoke-test downloaded HF artifact from a clean environment.
 
 Authentication was verified on 2026-09-26: Hugging Face `Tarek737` has repository
 write permission and GitHub `tarekamr737` has a valid login. The active HF
 credential is available under the ignored D-drive cache. The code and measured
 reports are public at `https://github.com/tarekamr737/MasriSwitch-TTS`.
-The measured experimental release gate passes. The allowlisted 2.6 GB model
-bundle is uploading to `Tarek737/MasriSwitch-TTS`; its final commit and downloaded
-artifact smoke are still pending. `scripts/kaggle_hf_smoke.py` is prepared
-to verify the published commit and synthesize at most ten private API prompts
-plus one Gradio callback in a fresh runtime; its dry-run passed.
+The experimental model is published at `https://huggingface.co/Tarek737/MasriSwitch-TTS`.
+Its checkpoint SHA256 matches the selected model. A fresh private Kaggle
+session (`tarekamr/masriswitch-hf-release-smoke`) is verifying all release
+files at the immutable published commit and testing ten API prompts plus one
+Gradio callback. The dry-run and stored notebook source checks passed;
+downloaded-artifact smoke results are pending. No further training is running.
 
 The Gradio interface and its real generation callback work privately. Public
 generation remains disabled because the upstream sample is authorized only

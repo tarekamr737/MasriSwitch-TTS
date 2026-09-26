@@ -5,6 +5,9 @@ and F5-TTS 1.1.7. **Experimental:** the completed E1 fine-tune did not meet
 the declared accuracy-improvement target. See [evaluation](reports/EVALUATION.md)
 for measured results, confidence intervals, and failure examples.
 
+[Model weights and card](https://huggingface.co/Tarek737/MasriSwitch-TTS) ·
+[Text benchmark](https://huggingface.co/datasets/Tarek737/MasriSwitch-Bench)
+
 ## Architecture
 
 Text → deterministic entity/number normalization → Unicode code-switch analysis
