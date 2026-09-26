@@ -4,12 +4,13 @@ Local Windows virtual environment: Python 3.10.20 in `D:\MasriSwitch-TTS\artifac
 Dependencies and caches are under `D:\MasriSwitch-TTS`.
 
 2026-09-26: `ruff format --check src tests scripts`, `ruff check src tests scripts`,
-`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 138 tests.
+`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 140 tests.
 The added inference tests verify that a private reference and a path escaping
 `artifacts/reference` cannot enable public synthesis.
 The disabled Gradio demo constructed successfully (`Blocks`, six components).
-`release-check` failed closed as expected while the selected train manifest,
-final E1 evaluation, and completed model card are missing.
+`release-check` failed closed as expected while final E1 evaluation and the
+completed model card are missing. The selected checkpoint download was verified
+and `artifacts/train_manifest.json` was finalized on 2026-09-26.
 The selected-checkpoint finalizer tests cover local checkpoint hash binding,
 metric-selection identity, and the complete audited train-ID set.
 The release bundle now records `model.pt` as a portable relative checkpoint
@@ -18,11 +19,16 @@ The model card renderer now states both the actual training endpoint and the
 selected checkpoint update, and requires verified early-stop evidence if the
 run ends before 8,000 updates.
 Direct `pytest` initially failed to import the script namespace; including the
-repository root in pytest's configured Python path fixed collection. All 138
+repository root in pytest's configured Python path fixed collection. All 140
 tests then passed (one upstream Starlette deprecation warning).
 The training finalizer now requires verified completion or the declared early
 stop and records the endpoint separately from the selected checkpoint update.
 Two added cases reject premature early-stop evidence.
+Separate `probe` and `full-probe` bundle stages avoid requiring each probe's
+own output before it can run. Two tests build them from predecessor evidence
+only and verify that private reference audio is excluded. A local first-probe
+bundle built successfully. README now includes the pinned F5 checkout,
+patch/plan preparation, archives, and both bounded probe commands.
 The complete 189-prompt validation produced zero invalid audio for each of
 the 1,000/2,000/3,000 checkpoints. The declared metric order selected update
 2,000 (`artifacts/checkpoint_selection.json`). A final private 489-prompt

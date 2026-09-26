@@ -5,7 +5,7 @@ Execute top-to-bottom. Keep each item tiny; mark `[x]` only with evidence.
 ## M0 — Scaffold
 - [x] Create package/layout, `pyproject.toml`, Makefile, LICENSE, NOTICE, `.gitignore`, `.env.example` (files present).
 - [x] Add config schemas + CLI skeleton (`masriswitch validate-config` passed).
-- [x] Add ruff/mypy/pytest and make `make check` green (equivalent venv commands passed: ruff, mypy, 138 tests, config validation; GNU make is unavailable on this Windows host).
+- [x] Add ruff/mypy/pytest and make `make check` green (equivalent venv commands passed: ruff, mypy, 140 tests, config validation; GNU make is unavailable on this Windows host).
 
 ## M1 — Sources + data
 - [x] Implement source registry + fail-closed license gate (`tests/test_pipeline.py`).
@@ -68,8 +68,10 @@ the frozen 1,000/2,000/3,000 short list completed. The 2,000-update checkpoint
 won by English EER (36.39%), followed by code-switch WER (45.47%); overall
 Arabic CER (37.23%) passed the relative 5% guardrail. Full metrics have the
 `_189_metrics.json` suffix; the original 50-prompt screening files are preserved.
-The selected checkpoint is downloading directly to D. Final 489-prompt
-evaluation and a bounded private API/Gradio smoke are running in
+The selected checkpoint downloaded directly to D and its SHA256 matched.
+`artifacts/train_manifest.json` binds the verified checkpoint to the audited
+training data, update 2,000 selection, and update 5,000 early-stop endpoint.
+Final 489-prompt evaluation and a bounded private API/Gradio smoke are running in
 `tarekamr/masriswitch-e1-final-489-product-smoke` (source verified after save).
 
 ## M5 — Product
@@ -88,10 +90,10 @@ evaluation and a bounded private API/Gradio smoke are running in
 - [ ] Publish weights only if release gate passes.
 - [ ] Smoke-test downloaded HF artifact from a clean environment.
 
-GitHub publication is currently gated by an invalid local `gh` token for
-`tarekamr737` (`gh auth status`, 2026-09-25). Code and release artifacts can
-continue to be prepared on D before authentication is renewed.
-Local Hugging Face CLI authentication is also absent (`hf auth whoami`,
-2026-09-26). The connector remains available for small Hub files, but uploading
-the selected 2.6 GB checkpoint requires local write credentials. A request to
-authenticate with `HF_HOME` on D is pending; no tokens should be pasted in chat.
+Authentication was verified on 2026-09-26: Hugging Face `Tarek737` has repository
+write permission and GitHub `tarekamr737` has a valid login. The active HF
+credential is available under the ignored D-drive cache. The GitHub project
+repository does not exist yet. Weight publication awaits final measured
+evaluation and release-gate approval. `scripts/kaggle_hf_smoke.py` is prepared
+to verify the published commit and synthesize at most ten private API prompts
+plus one Gradio callback in a fresh runtime; its dry-run passed.

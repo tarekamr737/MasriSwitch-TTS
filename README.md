@@ -24,11 +24,14 @@ export TMPDIR="$PWD/artifacts/tmp"
 mkdir -p "$TMPDIR"
 make setup
 make check
+git clone --depth 1 --branch 1.1.7 https://github.com/SWivid/F5-TTS.git artifacts/upstream/f5-tts
 masriswitch lock-sources
 make audit-data
 make prepare-data
+make bootstrap
 make benchmark
-make release-check
+python -c "from masriswitch.config import Paths; from masriswitch.train.patch_f5 import stage_training_code; stage_training_code(Paths())"
+python -c "from masriswitch.config import Paths; from masriswitch.eval.plan import build_e0_plan; build_e0_plan(Paths())"
 ```
 
 On Windows PowerShell, activate `.venv\Scripts\Activate.ps1` and set the
@@ -47,6 +50,60 @@ full-data probe manifests must be present under `artifacts/`. Both commands
 support `--dry-run`, `--max-samples`, and `--seed`; `make eval` aggregates pinned
 evaluation rows. No signed URLs or checkpoint bytes belong in the repository.
 
+### First-run Kaggle preparation
+
+Create the audited archives on the machine holding the prepared audio:
+
+```bash
+python scripts/archive_pilot.py --root . --output artifacts/pilot.tar.gz
+cp artifacts/pilot.tar.json artifacts/kaggle_pilot_archive.json
+python scripts/archive_full.py --root . --output artifacts/full_train.tar.gz --dry-run
+python scripts/archive_full.py --root . --output artifacts/full_train.tar.gz
+cp artifacts/full_train.tar.json artifacts/kaggle_full_archive.json
+python scripts/build_kaggle_bundle.py --stage probe --output artifacts/probe.zip
+```
+
+Keep archives private. Transfer the probe bundle to a fresh private Kaggle
+T4×2 session, extract it, and set `MASRISWITCH_ARCHIVE_URL` to the pilot
+archive's private download URL. From the extracted project, run:
+
+```bash
+python -m pip install --no-deps -e .
+PILOT_SHA=$(python -c "import json; print(json.load(open('artifacts/kaggle_pilot_archive.json'))['archive_sha256'])")
+ARROW_SHA=$(python -c "import json; print(json.load(open('artifacts/kaggle_pilot_archive.json'))['pilot_arrow_sha256'])")
+python scripts/kaggle_train_probe.py --root . \
+  --archive-url "$MASRISWITCH_ARCHIVE_URL" --archive-sha256 "$PILOT_SHA" \
+  --arrow-sha256 "$ARROW_SHA" --archive-manifest artifacts/kaggle_pilot_archive.json \
+  --patch-manifest artifacts/train_patch.json --max-samples 343 --seed 42 --dry-run
+# Repeat without --dry-run to perform the bounded 20-update probe.
+```
+
+Download `/kaggle/working/masriswitch_probe_result.json` as local
+`artifacts/train_probe.json`. Only after it passes, build `--stage pilot` and
+run `masriswitch train-pilot --dry-run`, then `masriswitch train-pilot` in a
+fresh private session, installing the extracted project there with the same
+`python -m pip install --no-deps -e .` command. Save its
+`masriswitch_pilot_result.json` as `artifacts/pilot_500_result.json`.
+
+Next build `--stage full-probe`, use the full archive URL, and run:
+
+```bash
+FULL_SHA=$(python -c "import json; print(json.load(open('artifacts/kaggle_full_archive.json'))['archive_sha256'])")
+ARROW_SHA=$(python -c "import json; print(json.load(open('artifacts/kaggle_full_archive.json'))['train_arrow_sha256'])")
+python scripts/kaggle_full_probe.py --root . \
+  --archive-url "$MASRISWITCH_ARCHIVE_URL" --archive-sha256 "$FULL_SHA" \
+  --arrow-sha256 "$ARROW_SHA" --archive-manifest artifacts/kaggle_full_archive.json \
+  --patch-manifest artifacts/train_patch.json --probe-result artifacts/train_probe.json \
+  --pilot-result artifacts/pilot_500_result.json --max-samples 3414 --seed 42 --dry-run
+# Repeat without --dry-run for the bounded full-data probe.
+```
+
+Save `masriswitch_full_probe_result.json` as `artifacts/full_probe_result.json` before building
+`--stage e1`. Run training in 1,000-update stages and resume from the previous
+checkpoint URL and verified hash. Each probe/training session supplies its
+own Python 3.10 environment; install this project before using its CLI.
+Stop on failed probes, invalid audio, or three stale validation checks.
+
 For the selected E1 evaluation, build an `--stage eval` bundle and extract it
 in a private Kaggle T4×2 session. Set `E1_CHECKPOINT_URL` to the selected
 checkpoint's private output URL, then run from the extracted project:
@@ -62,6 +119,11 @@ python scripts/kaggle_e0_eval.py \
 # Repeat the same command without --dry-run after the plan check passes.
 # Add --resume only when resuming matching, persisted output rows.
 ```
+
+For E0, use the same evaluation command with `--eval-stage E0` and omit both
+checkpoint arguments. The evaluator downloads the pinned untouched SILMA
+weights. Download `e0_all_eval_rows.jsonl` as `artifacts/e0_eval_rows.jsonl`
+and run `make eval` to aggregate the baseline before training.
 
 After downloading `e1_all_eval_rows.jsonl` into local `artifacts/`:
 
