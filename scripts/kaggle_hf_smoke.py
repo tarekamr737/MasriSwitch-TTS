@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 from kaggle_e0_eval import VOCOS_REV, VOCOS_SHA, _sha256
+from kaggle_product_smoke import approved_reference
 
 
 def main() -> None:
@@ -22,6 +23,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--reference-approval", type=Path)
     args = parser.parse_args()
     if not re.fullmatch(r"[0-9a-f]{40}", args.revision) or not re.fullmatch(
         r"[0-9a-f]{64}", args.checkpoint_sha256
@@ -29,6 +31,7 @@ def main() -> None:
         raise ValueError("Immutable HF commit and selected checkpoint SHA256 are required")
     if not 1 <= args.max_samples <= 10:
         raise ValueError("Release smoke is limited to 1–10 prompts")
+    approved = approved_reference(args.reference_approval) if args.reference_approval else None
     if args.dry_run:
         print(
             json.dumps(
@@ -49,6 +52,8 @@ def main() -> None:
         )
         os.execv(py, [py, __file__, *sys.argv[1:]])
 
+    # Fail on dependency incompatibilities before downloading the large checkpoint.
+    from f5_tts.infer.utils_infer import load_model  # noqa: F401
     from huggingface_hub import hf_hub_download
 
     root = Path("/tmp/masriswitch-e1-eval")
@@ -64,6 +69,8 @@ def main() -> None:
             and previous.get("api_prompts") == args.max_samples
             and previous.get("seed") == args.seed
             and previous.get("passed") is True
+            and previous.get("public_reference_approved") is bool(approved)
+            and (not approved or previous.get("reference_sha256") == approved[1])
         ):
             print("HF_RELEASE_SMOKE_ALREADY_COMPLETE", flush=True)
             return
@@ -109,6 +116,8 @@ def main() -> None:
     ]
     if args.resume:
         command.append("--resume")
+    if args.reference_approval:
+        command.extend(["--reference-approval", str(args.reference_approval.resolve())])
     subprocess.run(command, check=True, timeout=900)
     smoke = json.loads(Path("/kaggle/working/product_smoke.json").read_text(encoding="utf-8"))
     if smoke.get("passed") is not True or smoke.get("checkpoint_sha256") != args.checkpoint_sha256:

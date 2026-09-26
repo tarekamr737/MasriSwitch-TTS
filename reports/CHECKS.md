@@ -4,7 +4,29 @@ Local Windows virtual environment: Python 3.10.20 in `D:\MasriSwitch-TTS\artifac
 Dependencies and caches are under `D:\MasriSwitch-TTS`.
 
 2026-09-26: `ruff format --check src tests scripts`, `ruff check src tests scripts`,
-`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 140 tests.
+`mypy src`, `pytest -q`, and `masriswitch validate-config` passed; 144 tests.
+Four additional cases verify approved smoke-reference acceptance and rejection
+of missing consent, changed audio bytes, and paths outside the reference folder.
+The user-provided reference is 8.4935 seconds, converted from mono 48 kHz Opus
+to mono 24 kHz PCM16 WAV; finite samples, peak 0.9653, no clipped samples.
+Its SHA256 is `bfc41bddcaf77b13a53be17ba0454ff14f8e6aa0cdeff71c326937f16e94a5c6`.
+The user confirmed own-voice public-demo consent and the exact transcript.
+`approved_engine_files` validated the actual selected checkpoint and reference.
+Consent and audio remain in ignored `artifacts/reference/`.
+Fresh HF release-smoke v1 verified all 13 published files but failed before
+synthesis because unpinned datasets selected an incompatible pyarrow API.
+The training extra now pins datasets 3.6.0, already used by successful E0/E1
+evaluation, and the smoke imports F5 before downloading the checkpoint.
+Version 2 completed in a fresh private Kaggle Python 3.10 environment. All 13
+release files matched the manifest at HF commit
+`de6cd6819e719876909437cc33ca7086cff369c9`. Ten real FastAPI synthesis requests
+and one Gradio callback passed with the approved user voice: finite nonzero
+24 kHz audio, correct audio/WAV and AI-generated response headers.
+`artifacts/hf_release_smoke.json` and `artifacts/approved_voice_product_smoke.json`
+were downloaded to D and checked against the exact revision, manifest hash,
+checkpoint hash, reference hash, filenames, and expected prompt counts.
+This was an inference-only check; no training or locked evaluation was rerun.
+The demo interface is tested; no persistent public hosting was deployed.
 The added inference tests verify that a private reference and a path escaping
 `artifacts/reference` cannot enable public synthesis.
 The disabled Gradio demo constructed successfully (`Blocks`, six components).

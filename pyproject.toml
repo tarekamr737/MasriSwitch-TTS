@@ -18,7 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 data = ["datasets==3.6.0", "librosa==0.11.0", "scipy==1.15.3"]
-train = ["f5-tts==1.1.7", "accelerate==1.10.1", "torch==2.6.0", "torchaudio==2.6.0", "transformers==4.46.3"]
+train = ["f5-tts==1.1.7", "accelerate==1.10.1", "torch==2.6.0", "torchaudio==2.6.0", "transformers==4.46.3", "datasets==3.6.0"]
 eval = ["jiwer==4.0.0", "rapidfuzz==3.14.1", "faster-whisper==1.2.0"]
 serve = ["fastapi==0.116.1", "uvicorn==0.35.0", "gradio==5.35.0"]
 dev = ["pytest==8.4.2", "ruff==0.13.1", "mypy==1.18.2", "types-PyYAML==6.0.12.20250809"]

@@ -80,7 +80,7 @@ CER 38.03%. Reports and the model card disclose the experimental outcome.
 ## M5 — Product
 - [x] Build typed inference engine around best checkpoint (`artifacts/product_smoke.json`: selected checkpoint hash verified; real private inference passed).
 - [x] Add FastAPI health/model-info/normalize/synthesize (unit tests and ten real private 24 kHz WAV requests passed).
-- [ ] Add minimal Gradio demo with fixed approved reference voice.
+- [x] Add minimal Gradio demo with fixed approved reference voice (`artifacts/approved_voice_product_smoke.json`: user consent documented; ten real API requests and one Gradio callback passed with the approved reference).
 - [x] Add lightweight local run instructions (`README.md`: API/demo commands, D-drive caches, and approved-reference configuration).
 
 ## M6 — Evaluation + release
@@ -91,7 +91,7 @@ CER 38.03%. Reports and the model card disclose the experimental outcome.
 - [x] Generate HF model card, benchmark data card, NOTICE/attributions (model card generated from measured artifacts; benchmark card already published).
 - [x] Publish text-only benchmark (`https://huggingface.co/datasets/Tarek737/MasriSwitch-Bench`; downloaded SHA256 matched local manifest; `artifacts/hf_benchmark_release.json`).
 - [x] Publish weights only if release gate passes (`Tarek737/MasriSwitch-TTS`, commit `de6cd6819e719876909437cc33ca7086cff369c9`; remote checkpoint SHA256 matches the selected model).
-- [ ] Smoke-test downloaded HF artifact from a clean environment.
+- [x] Smoke-test downloaded HF artifact from a clean environment (`artifacts/hf_release_smoke.json`: immutable release, all 13 file hashes, ten API requests and one Gradio callback passed in fresh Kaggle Python 3.10).
 
 Authentication was verified on 2026-09-26: Hugging Face `Tarek737` has repository
 write permission and GitHub `tarekamr737` has a valid login. The active HF
@@ -99,11 +99,17 @@ credential is available under the ignored D-drive cache. The code and measured
 reports are public at `https://github.com/tarekamr737/MasriSwitch-TTS`.
 The experimental model is published at `https://huggingface.co/Tarek737/MasriSwitch-TTS`.
 Its checkpoint SHA256 matches the selected model. A fresh private Kaggle
-session (`tarekamr/masriswitch-hf-release-smoke`) is verifying all release
-files at the immutable published commit and testing ten API prompts plus one
-Gradio callback. The dry-run and stored notebook source checks passed;
-downloaded-artifact smoke results are pending. No further training is running.
+session (`tarekamr/masriswitch-hf-release-smoke`, v2) verified all 13 release
+files at the immutable published commit and passed ten API prompts plus one
+Gradio callback using the approved user reference. The dry-run, stored source,
+and downloaded output checks passed. No further training is running.
 
-The Gradio interface and its real generation callback work privately. Public
-generation remains disabled because the upstream sample is authorized only
-for private tests; no consented public reference voice has been supplied.
+The user supplied their own 8.4935-second recording and explicitly confirmed
+public demo consent and the exact transcript on 2026-09-26. The mono 24 kHz
+PCM16 reference and approval evidence are under ignored `artifacts/reference/`.
+Audio checks and the real local checkpoint/reference configuration passed.
+The upstream sample remains private-test-only. The bounded inference check with
+the new approved voice passed in release-smoke v2. Version 1 verified all
+13 published files but failed before synthesis on a datasets/pyarrow import
+incompatibility; the training extra now pins the previously working datasets
+3.6.0 version. No additional training is needed.

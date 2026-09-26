@@ -170,7 +170,10 @@ E1 reduced code-switch WER by only 0.06% relative; English EER worsened by
 1.80% relative. It missed the target of ≥15% WER or ≥25% EER reduction.
 Arabic-only CER and latency guardrails passed, with zero invalid audio.
 The selected model also passed ten private FastAPI synthesis requests and a
-Gradio generation callback. Public voice approval remains pending.
+Gradio generation callback. A user-provided fixed voice now has documented
+public demo consent; ten API requests and a Gradio callback passed using it
+with a freshly downloaded, hash-verified HF release. The recording and consent
+record are kept in ignored artifacts and are not distributed with the code.
 
 ## Licenses and limitations
 
