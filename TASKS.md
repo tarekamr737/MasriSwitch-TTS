@@ -95,9 +95,11 @@ CER 38.03%. Reports and the model card disclose the experimental outcome.
 
 Authentication was verified on 2026-09-26: Hugging Face `Tarek737` has repository
 write permission and GitHub `tarekamr737` has a valid login. The active HF
-credential is available under the ignored D-drive cache. The GitHub project
-repository does not exist yet. The measured experimental release gate passes;
-publication is next. `scripts/kaggle_hf_smoke.py` is prepared
+credential is available under the ignored D-drive cache. The code and measured
+reports are public at `https://github.com/tarekamr737/MasriSwitch-TTS`.
+The measured experimental release gate passes. The allowlisted 2.6 GB model
+bundle is uploading to `Tarek737/MasriSwitch-TTS`; its final commit and downloaded
+artifact smoke are still pending. `scripts/kaggle_hf_smoke.py` is prepared
 to verify the published commit and synthesize at most ten private API prompts
 plus one Gradio callback in a fresh runtime; its dry-run passed.
 
