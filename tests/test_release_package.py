@@ -43,6 +43,8 @@ def test_release_bundle_hashes_selected_checkpoint(
         paths.artifacts / "upstream/silma/vocab.txt",
         paths.artifacts / "data_audit.json",
         paths.artifacts / "eval_metrics.json",
+        paths.artifacts / "checkpoint_selection.json",
+        paths.artifacts / "e1_progress.json",
     ):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("test")
@@ -56,5 +58,7 @@ def test_release_bundle_hashes_selected_checkpoint(
     assert (bundle / "model.pt").read_bytes() == checkpoint.read_bytes()
     assert result["files_sha256"]["model.pt"] == digest
     assert (bundle / "README.md").read_text() == "test"
+    assert (bundle / "checkpoint_selection.json").read_text() == "test"
+    assert (bundle / "training_progress.json").read_text() == "test"
     assert json.loads((bundle / "training_args.json").read_text())["best_checkpoint"] == "model.pt"
     assert release_package.package_release(paths)["checkpoint_sha256"] == digest

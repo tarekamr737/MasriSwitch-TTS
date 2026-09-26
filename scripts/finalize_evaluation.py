@@ -48,6 +48,10 @@ def main() -> None:
     e0 = _read(paths.artifacts / "baseline_metrics.json")
     e1 = _read(args.e1_metrics)
     train = _read(paths.artifacts / "train_manifest.json")
+    selection = _read(paths.artifacts / "checkpoint_selection.json")
+    progress = _read(paths.artifacts / "e1_progress.json")
+    if selection.get("selected_checkpoint_sha256") != train.get("checkpoint_sha256"):
+        raise ValueError("Checkpoint selection does not match the final training manifest")
     if not _complete_evaluation(e0, {"E0": e0, "E1": e1}, train):
         raise ValueError("Complete, matching E0/E1 evaluations and selected checkpoint required")
     if _sha256(args.e1_rows) != e1.get("rows_sha256") or _sha256(
@@ -95,6 +99,7 @@ def main() -> None:
         "## Prompt bootstrap 95% intervals",
         "",
         "Intervals use 2,000 prompt resamples with seed 42.",
+        "",
     ]
     for label, metrics in (("E0", m0), ("E1", m1)):
         lines.append(
@@ -105,7 +110,35 @@ def main() -> None:
             f"{_percent(metrics['ar_cer_95ci'][0])}–"
             f"{_percent(metrics['ar_cer_95ci'][1])}."
         )
-    lines += ["", "## Highest-error locked prompts", ""]
+    lines += [
+        "",
+        "## Validation-only checkpoint selection",
+        "",
+        "The frozen 50-prompt screening advanced three eligible checkpoints to all "
+        "189 validation prompts. Selection minimized English EER, then code-switch WER, "
+        "subject to overall Arabic CER ≤1.05 × E0 validation. "
+        "The 300 locked benchmark prompts were excluded from selection.",
+        "",
+        "| Updates | English EER | Code-switch WER | Overall Arabic CER | Selected |",
+        "|---|---:|---:|---:|---|",
+    ]
+    updates = {stage["checkpoint_sha256"]: stage["updates"] for stage in progress["stages"]}
+    for candidate in selection["candidates"]:
+        sha = candidate["checkpoint_sha256"]
+        lines.append(
+            f"| {updates[sha]:,} | {_percent(candidate['english_eer'])} | "
+            f"{_percent(candidate['cs_wer'])} | {_percent(candidate['ar_cer'])} | "
+            f"{'yes' if sha == train['checkpoint_sha256'] else 'no'} |"
+        )
+    lines += [
+        "",
+        f"Training endpoint: {train['training_endpoint_updates']:,} updates; "
+        f"selected checkpoint: {train['selected_updates']:,} updates. "
+        f"Declared early stop: {train['stopped_early']}.",
+        "",
+        "## Highest-error locked prompts",
+        "",
+    ]
     for row in ranked[:3]:
         lines.append(
             f"- `{row['id']}` reference: {row['reference_text']}  "

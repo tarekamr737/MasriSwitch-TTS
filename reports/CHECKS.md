@@ -8,9 +8,9 @@ Dependencies and caches are under `D:\MasriSwitch-TTS`.
 The added inference tests verify that a private reference and a path escaping
 `artifacts/reference` cannot enable public synthesis.
 The disabled Gradio demo constructed successfully (`Blocks`, six components).
-`release-check` failed closed as expected while final E1 evaluation and the
-completed model card are missing. The selected checkpoint download was verified
-and `artifacts/train_manifest.json` was finalized on 2026-09-26.
+`release-check` passed after measured final E1 evaluation and model-card
+generation. The selected checkpoint download was verified and
+`artifacts/train_manifest.json` was finalized on 2026-09-26.
 The selected-checkpoint finalizer tests cover local checkpoint hash binding,
 metric-selection identity, and the complete audited train-ID set.
 The release bundle now records `model.pt` as a portable relative checkpoint
@@ -35,8 +35,12 @@ the 1,000/2,000/3,000 checkpoints. The declared metric order selected update
 evaluation and ten-request FastAPI/one-callback Gradio smoke were submitted
 with bundle SHA256
 `a3c184c3a9167b724633d61917b085345a56a766cdddb1e1a4b4f608051b4c0a`.
-The stored Kaggle source matched the submitted source. Their results are
-pending; no public voice approval was granted by these private checks.
+The stored Kaggle source matched the submitted source. The session completed:
+489 valid evaluation outputs, ten real FastAPI 24 kHz WAV responses, and one
+real Gradio generation callback. E1 code-switch WER is 61.34%, English EER
+52.53%, and Arabic-only CER 38.03%; the accuracy target was missed. These
+private checks do not grant public voice approval. The experimental release
+bundle includes checkpoint-selection and early-stop evidence.
 GNU make is not installed
 on this host, so the equivalent commands in the Makefile were run directly.
 

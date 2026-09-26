@@ -44,6 +44,8 @@ def package_release(paths: Paths) -> dict[str, Any]:
         "vocab.txt": paths.artifacts / "upstream" / "silma" / "vocab.txt",
         "data_manifest.json": paths.artifacts / "data_audit.json",
         "eval_results.json": paths.artifacts / "eval_metrics.json",
+        "checkpoint_selection.json": paths.artifacts / "checkpoint_selection.json",
+        "training_progress.json": paths.artifacts / "e1_progress.json",
     }
     for name, source in files.items():
         if not source.is_file():

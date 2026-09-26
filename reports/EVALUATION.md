@@ -1,62 +1,43 @@
 # Evaluation
 
-Status: E0 completed on 489 prompts with a pinned independent ASR evaluator;
-E1 final comparison: TBD; update 2,000 was selected on validation. See `reports/BASELINE.md` for the
-full E0 protocol, group tables, timing, and limitations.
+Measured on the same 189 validation and 300 locked benchmark prompts, with the same private reference voice and 16-step inference protocol.
 
-| Model | Code-switch WER (412) | English EER | Arabic-only CER (77) |
-|---|---:|---:|---:|
-| E0 SILMA | 61.38% (95% CI 58.76–64.10%) | 51.60% (47.14–56.08%) | 38.57% (34.53–42.45%) |
-| E1 | TBD | TBD | TBD |
+| Model | Code-switch WER | English EER | Arabic-only CER | Critical entity accuracy | Speaker cosine | Mean RTF | Invalid audio |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| E0 SILMA | 61.38% | 51.60% | 38.57% | 10.19% | 0.728 | 0.308 | 0 |
+| E1 selected | 61.34% | 52.53% | 38.03% | 10.19% | 0.728 | 0.305 | 0 |
 
-The intervals are prompt bootstraps with 2,000 resamples and seed 42. The
-reference sample is restricted to private evaluation. Human naturalness and
-pronunciation scores have not been measured.
+Relative code-switch WER reduction: 0.06%; English EER reduction: -1.80%.
+Arabic-only CER ≤5% relative regression: True; mean RTF ≤10% regression: True.
+Accuracy target (≥15% code-switch WER or ≥25% English EER reduction): False.
 
-Checkpoint selection uses only the 189 validation prompts. E0 on this subset
-has English EER 36.88%, code-switch WER 45.11%, and overall Arabic CER 36.35%
-(`artifacts/e0_validation_metrics.json`). Only two validation prompts are
-Arabic-only, so the selection guardrail uses overall Arabic CER on validation;
-the final comparison will separately measure Arabic-only CER on the fixed
-489-prompt plan. The 300 locked benchmark prompts are excluded from selection.
-To bound GPU use, every 1,000-update checkpoint is screened on the same frozen
-first 50 validation prompts. The three eligible checkpoints with lowest
-English EER, then code-switch WER, advance to the full 189-prompt validation
-comparison. The final checkpoint is chosen from those three by the same metric
-order and Arabic CER guardrail; locked benchmark prompts never influence it.
+## Prompt bootstrap 95% intervals
 
-At 1,000 E1 updates, an early 50-prompt validation check measured English EER
-32.63% versus E0 37.89%, code-switch WER 44.48% versus E0 43.43%, and overall
-Arabic CER 35.12% versus E0 34.88% on those same prompts. All 50 outputs were
-valid. These are interim selection signals, not the final locked comparison.
-At 2,000 updates on the same 50 prompts, English EER was 34.74%, code-switch
-WER 43.43%, and overall Arabic CER 35.26%, with zero invalid outputs.
-At 3,000 updates, English EER was 40.00%, code-switch WER 43.58%, and overall
-Arabic CER 35.45%, again with zero invalid outputs. The checkpoint passed the
-audited train-ID, exact-update, finite-loss, and ten-prompt private smoke
-checks. This is the first validation check with neither EER nor code-switch
-WER improving over previous E1 checks (`artifacts/e1_progress.json`).
-At 4,000 updates, English EER was 34.74%, code-switch WER 44.03%, and overall
-Arabic CER 37.91%, with zero invalid outputs. The Arabic CER fails the 5%
-relative guardrail on these 50 validation prompts. This is the second stale
-check under the predeclared early-stop rule.
-At 5,000 updates, English EER was 32.63%, code-switch WER 44.18%, and overall
-Arabic CER 37.01%, with zero invalid outputs. EER only tied the previous best,
-WER worsened, and Arabic CER again failed the guardrail. This third stale check
-stopped training at 5,000 updates. The frozen 50-prompt short list advances
-the 1,000-, 2,000-, and 3,000-update checkpoints to all 189 validation prompts.
+Intervals use 2,000 prompt resamples with seed 42.
 
-## Completed checkpoint selection
+- E0: code-switch WER 58.76%–64.10%; English EER 47.14%–56.08%; Arabic-only CER 34.53%–42.45%.
+- E1: code-switch WER 58.75%–63.98%; English EER 48.28%–56.95%; Arabic-only CER 34.01%–41.81%.
 
-| Updates | Validation English EER | Code-switch WER | Overall Arabic CER |
-|---|---:|---:|---:|
-| 1,000 | 37.38% | 45.87% | 37.29% |
-| **2,000 (selected)** | **36.39%** | **45.47%** | **37.23%** |
-| 3,000 | 37.13% | 45.44% | 37.73% |
+## Validation-only checkpoint selection
 
-All candidates passed the full-validation Arabic CER threshold of 38.17%.
-The 2,000-update checkpoint has the lowest English EER, the first declared
-selection metric. Its SHA256 is
-`558e2ab53e1b5450bcd1a1c30683a1b3e6be1234b7e198b74209f362693eaf92`.
-Each candidate produced 189 valid outputs. The locked benchmark comparison
-is running separately; no locked results were available for selection.
+The frozen 50-prompt screening advanced three eligible checkpoints to all 189 validation prompts. Selection minimized English EER, then code-switch WER, subject to overall Arabic CER ≤1.05 × E0 validation. The 300 locked benchmark prompts were excluded from selection.
+
+| Updates | English EER | Code-switch WER | Overall Arabic CER | Selected |
+|---|---:|---:|---:|---|
+| 1,000 | 37.38% | 45.87% | 37.29% | no |
+| 2,000 | 36.39% | 45.47% | 37.23% | yes |
+| 3,000 | 37.13% | 45.44% | 37.73% | no |
+
+Training endpoint: 5,000 updates; selected checkpoint: 2,000 updates. Declared early stop: True.
+
+## Highest-error locked prompts
+
+- `msb1_telecom_ar_dominant_042` reference: حضرتك هتلاقي تفاصيل Premium Plan في الباقة رقم 1042.  ASR hypothesis: حضاقي تصل بريميوم في مبيع باقة رقم ثم فوزين فونسين
+- `msb1_banking_balanced_016` reference: حضرتك، credit card مرتبط بـ Online Banking رقم 1016 من النهارده.  ASR hypothesis: كردت كار برون لائن بانكين رقمتازن سيسكتين نهارب
+- `msb1_banking_balanced_022` reference: حضرتك، credit card مرتبط بـ Online Banking رقم 1022 من النهارده.  ASR hypothesis: ترجمة نانسي قنقر
+
+## Limits and provenance
+
+These are independent ASR proxy scores, not human judgments of pronunciation or naturalness. The training audio is synthetic and has no speaker IDs. The fixed SILMA sample was used privately; no public voice consent was established.
+Plan SHA256: `26dc087cabc32544c401eebcaaf804185901cbd829358f6c795e0d232ced9185`. Selected checkpoint SHA256: `558e2ab53e1b5450bcd1a1c30683a1b3e6be1234b7e198b74209f362693eaf92`.
+Machine-readable results: `artifacts/eval_metrics.json`.

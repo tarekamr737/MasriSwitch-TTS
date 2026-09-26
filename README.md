@@ -1,8 +1,9 @@
 # MasriSwitch-TTS
 
 Egyptian Arabic ↔ English code-switched TTS built from [SILMA TTS v1](https://huggingface.co/silma-ai/silma-tts)
-and F5-TTS 1.1.7. This repository is under active development; no fine-tuned
-weights or performance claims are published yet.
+and F5-TTS 1.1.7. **Experimental:** the completed E1 fine-tune did not meet
+the declared accuracy-improvement target. See [evaluation](reports/EVALUATION.md)
+for measured results, confidence intervals, and failure examples.
 
 ## Architecture
 
@@ -159,8 +160,14 @@ JSONL SHA256 matches the local manifest.
 | Experiment | Code-switch WER | English EER | Arabic CER | Status |
 |---|---:|---:|---:|---|
 | E0 SILMA baseline | 61.38% | 51.60% | 38.57% | 489 prompts measured |
-| E1 fine-tune | TBD | TBD | TBD | Update 2,000 selected; final evaluation running |
+| E1 fine-tune | 61.34% | 52.53% | 38.03% | 489 prompts measured; update 2,000 selected |
 | E2 replay | TBD | TBD | TBD | Optional |
+
+E1 reduced code-switch WER by only 0.06% relative; English EER worsened by
+1.80% relative. It missed the target of ≥15% WER or ≥25% EER reduction.
+Arabic-only CER and latency guardrails passed, with zero invalid audio.
+The selected model also passed ten private FastAPI synthesis requests and a
+Gradio generation callback. Public voice approval remains pending.
 
 ## Licenses and limitations
 

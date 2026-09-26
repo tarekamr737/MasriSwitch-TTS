@@ -71,21 +71,24 @@ Arabic CER (37.23%) passed the relative 5% guardrail. Full metrics have the
 The selected checkpoint downloaded directly to D and its SHA256 matched.
 `artifacts/train_manifest.json` binds the verified checkpoint to the audited
 training data, update 2,000 selection, and update 5,000 early-stop endpoint.
-Final 489-prompt evaluation and a bounded private API/Gradio smoke are running in
-`tarekamr/masriswitch-e1-final-489-product-smoke` (source verified after save).
+Final 489-prompt evaluation and a private API/Gradio smoke completed in
+`tarekamr/masriswitch-e1-final-489-product-smoke`. All 489 evaluation outputs,
+ten FastAPI WAV responses, and one Gradio callback were valid. E1 did not meet
+the accuracy target: code-switch WER 61.34%, English EER 52.53%, Arabic-only
+CER 38.03%. Reports and the model card disclose the experimental outcome.
 
 ## M5 — Product
-- [ ] Build typed inference engine around best checkpoint.
-- [ ] Add FastAPI health/model-info/normalize/synthesize.
+- [x] Build typed inference engine around best checkpoint (`artifacts/product_smoke.json`: selected checkpoint hash verified; real private inference passed).
+- [x] Add FastAPI health/model-info/normalize/synthesize (unit tests and ten real private 24 kHz WAV requests passed).
 - [ ] Add minimal Gradio demo with fixed approved reference voice.
 - [x] Add lightweight local run instructions (`README.md`: API/demo commands, D-drive caches, and approved-reference configuration).
 
 ## M6 — Evaluation + release
-- [ ] Run final locked evaluation E0 vs E1 (+E2 if available).
-- [ ] Write `EVALUATION.md` with real tables/CIs and failure examples.
-- [ ] Implement `release-check`; verify no blocked data touched training.
-- [ ] Create GitHub README with exact reproduce/Kaggle commands.
-- [ ] Generate HF model card, benchmark data card, NOTICE/attributions.
+- [x] Run final locked evaluation E0 vs E1 (`artifacts/eval_metrics.json`: same 489-prompt plan, including 300 locked prompts, zero invalid outputs).
+- [x] Write `EVALUATION.md` with real tables/CIs and failure examples (includes validation-only selection table and the missed accuracy target).
+- [x] Implement `release-check`; verify no blocked data touched training (`artifacts/release_gate.json`: passed; exactly the 3,414 audited D1 train IDs).
+- [x] Create GitHub README with exact reproduce/Kaggle commands (fresh probe stages tested; measured final table included).
+- [x] Generate HF model card, benchmark data card, NOTICE/attributions (model card generated from measured artifacts; benchmark card already published).
 - [x] Publish text-only benchmark (`https://huggingface.co/datasets/Tarek737/MasriSwitch-Bench`; downloaded SHA256 matched local manifest; `artifacts/hf_benchmark_release.json`).
 - [ ] Publish weights only if release gate passes.
 - [ ] Smoke-test downloaded HF artifact from a clean environment.
@@ -93,7 +96,11 @@ Final 489-prompt evaluation and a bounded private API/Gradio smoke are running i
 Authentication was verified on 2026-09-26: Hugging Face `Tarek737` has repository
 write permission and GitHub `tarekamr737` has a valid login. The active HF
 credential is available under the ignored D-drive cache. The GitHub project
-repository does not exist yet. Weight publication awaits final measured
-evaluation and release-gate approval. `scripts/kaggle_hf_smoke.py` is prepared
+repository does not exist yet. The measured experimental release gate passes;
+publication is next. `scripts/kaggle_hf_smoke.py` is prepared
 to verify the published commit and synthesize at most ten private API prompts
 plus one Gradio callback in a fresh runtime; its dry-run passed.
+
+The Gradio interface and its real generation callback work privately. Public
+generation remains disabled because the upstream sample is authorized only
+for private tests; no consented public reference voice has been supplied.

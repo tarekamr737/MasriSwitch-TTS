@@ -70,6 +70,9 @@ def main() -> None:
     ):
         raise ValueError("Measured, selected, release-safe E1 is required")
     m0, m1 = e0["metrics"], e1["metrics"]
+    accuracy_target_met = (
+        m1["cs_wer"] <= 0.85 * m0["cs_wer"] or m1["english_eer"] <= 0.75 * m0["english_eer"]
+    )
     training_status = _training_status(train, progress)
     lines = [
         "---",
@@ -124,6 +127,9 @@ def main() -> None:
         "",
         "These metrics are ASR proxies, not human pronunciation or naturalness "
         "scores. See `EVALUATION.md` for confidence intervals and errors.",
+        "The declared accuracy target (≥15% relative code-switch WER reduction or "
+        "≥25% English EER reduction) was "
+        + ("met." if accuracy_target_met else "not met. This release remains experimental."),
         "",
         "## Limitations and misuse",
         "",
