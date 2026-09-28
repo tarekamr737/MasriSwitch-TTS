@@ -139,13 +139,22 @@ locked benchmark and selected checkpoint are unchanged.
 - [x] Verify the bounded before/after inference comparison and update the Space
   (same model/reference/seed, 16 steps; five chunks; live anonymous long-sentence
   request passed; `artifacts/long_text_probe.json`, `artifacts/space_long_text_smoke.json`).
+- [x] Verify the completed 32-step follow-up on the same prompt: no proxy accuracy
+  gain and 2.03× synthesis time versus chunked 16 steps; retain the live 16-step
+  setting (`artifacts/long_text_32_verification.json`, `reports/QUALITY_REVIEW.md`).
+- [x] Reorganize README with the public demo, measured results, reproduction
+  commands, limitations, and an evidence-based plan before further training.
 
 The inference-only private probe `tarekamr/masriswitch-long-text-probe` compares
 the exact reported sentence with unchanged model, approved reference, seed,
 and 16 inference steps. No locked benchmark or training data is used.
 The automated comparison recovered the ending more clearly but aggregate
-metrics were mixed; no global quality improvement is claimed. The optional
-32-step follow-up has no result yet; Kaggle reported its two-batch-session
-limit. The live demo retains the tested 16-step setting. Listening feedback
-on the updated sentence is pending; underlying model pronunciation remains
-experimental. No additional training was started.
+metrics were mixed; no global quality improvement is claimed. The queued
+32-step follow-up completed and its hashes, audio, and proxy metrics were
+verified on 2026-09-28. It did not improve accuracy on this sentence and took
+2.03 times as long. The live demo retains the tested 16-step setting.
+Listening feedback on the updated sentence is pending; underlying model
+pronunciation remains experimental. The next recommended quality experiment
+is a controlled E0/E1 comparison on fresh development prompts followed by
+training-data review and a bounded pilot if justified. It has not been run.
+No additional training was started.

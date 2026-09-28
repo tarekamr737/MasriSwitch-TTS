@@ -3,6 +3,13 @@
 Local Windows virtual environment: Python 3.10.20 in `D:\MasriSwitch-TTS\artifacts\python`.
 Dependencies and caches are under `D:\MasriSwitch-TTS`.
 
+2026-09-28 documentation refresh: README links (19 local targets), script paths
+(10), Markdown fences, data counts, experiment tables, relative changes, and
+source pins were checked against the measured evidence. `git diff --check`
+passed. Verification is recorded in `artifacts/readme_verification.json`.
+Only documentation changed; the earlier full code-check results below are
+unchanged. No additional training or live inference request was started.
+
 Long-text follow-up: 165 tests pass. New cases cover Arabic comma boundaries,
 byte limits after number expansion, unpunctuated input, intact decimal/time
 tokens, oversized-word rejection, and ordered assembly of every generated piece.
@@ -13,8 +20,12 @@ with bounded chunking; automatic quality results are mixed, as documented in
 `2c34711b41a388e41a311ee4827944f00ed82cc5`; the user's exact long prompt passed
 an anonymous public request (21.984 seconds of 24 kHz audio, request 7.888 s).
 `artifacts/space_long_text_smoke.json` binds the saved WAV to that request.
-The optional 32-step probe is pending due to Kaggle's batch-session limit;
-the live inference setting remains 16. No additional training was started.
+The queued 32-step probe completed and was verified on 2026-09-28. Checkpoint,
+reference, baseline JSON, prompt/chunk, and WAV hashes matched; the WAV was
+finite/nonzero mono 24 kHz. Recomputed WER/CER/EER matched the result JSON.
+No accuracy gain was measured on this prompt, and synthesis took 2.03 times
+as long as chunked 16-step inference (`artifacts/long_text_32_verification.json`).
+The live inference setting remains 16. No additional training was started.
 
 Public deployment follow-up, 2026-09-26: 159 unit tests passed, plus format,
 lint, types, and config validation. The five affected validation inputs now

@@ -26,13 +26,31 @@ remain the original experiment's results. No training was started.
 ## Decision on further training
 
 Do not extend the stopped E1 run: it already reached its declared three-stale-
-check stopping rule, and later checkpoints failed the Arabic guardrail.
-The next useful evidence is human listening on new sentences with the approved
-demo voice. Preserve exact inputs and describe wrong, missing, or rushed words.
-If those errors justify another experiment, freeze a validation-only comparison
-of inference settings before any new training; keep the original locked set
-out of tuning. Any claimed improvement needs a separate, measured evaluation.
-E2 also remains blocked by unverified Common Voice source terms/revision.
+check stopping rule, and later checkpoints failed the Arabic guardrail. Its
+selected checkpoint reduced code-switch WER by only 0.06% relative; English
+EER worsened by 1.80% relative. The evidence does not justify more updates with
+the same data and recipe. It also does not establish the cause of the failure.
+
+Recommended next experiment, not yet run:
+
+1. Compare untouched SILMA and selected E1 on fresh development prompts with
+   the same approved voice, normalization, chunking, seed, and 16-step runtime.
+   Cover short and long utterances, language switches, IDs, times, and prices.
+   Keep both the old locked benchmark and a new evaluation holdout out of tuning.
+2. Save paired audio and annotate wrong, omitted, repeated, or rushed words.
+   Combine independent ASR scoring with blind human listening; forced-language
+   ASR alone cannot establish pronunciation quality.
+3. Inspect audio/transcript alignment, Egyptian pronunciation, English coverage,
+   and entity examples in the audited synthetic training set. Limited real-speaker
+   diversity is a plausible constraint, not a measured cause. Any additional
+   speech needs verified redistribution/training terms and documented consent.
+4. If that review supports a changed dataset or recipe, start a separate bounded
+   correctness probe and pilot. Advance to a longer run only after valid audio
+   and validation improvement satisfy the declared gates. Select by validation
+   metrics and measure once on the held-out evaluation set.
+
+No new training was started. E2 remains blocked by unverified Common Voice
+source terms/revision; it requires a verified source audit before training.
 
 ## Deployment environment
 
@@ -67,22 +85,33 @@ A private two-generation comparison used the same published checkpoint,
 approved voice, seed 42, PyTorch 2.8.0, and 16 inference steps. Both WAV hashes
 were verified after download to D (`artifacts/long_text_probe.json`).
 
-| One reported prompt only | Legacy | Chunked, 16 steps |
-|---|---:|---:|
-| Arabic-decoder WER | 80.85% | 76.60% |
-| Arabic character error | 59.87% | 66.24% |
-| English entity error | 25.00% | 25.00% |
-| Generated seconds | 21.792 | 21.984 |
-| Synthesis seconds, T4 | 4.761 | 6.271 |
+| One reported prompt only | Legacy, 16 steps | Chunked, 16 steps | Chunked, 32 steps |
+|---|---:|---:|---:|
+| Arabic-decoder WER | 80.85% | 76.60% | 78.72% |
+| Arabic character error | 59.87% | 66.24% | 66.24% |
+| English entity error | 25.00% | 25.00% | 25.00% |
+| Generated seconds | 21.792 | 21.984 | 21.984 |
+| Synthesis seconds, T4 | 4.761 | 6.271 | 12.759 |
 
 The split version's transcript recovers the final instruction about trying
 another credit card, but aggregate proxy results are mixed and ID/time errors
 remain. Forced Arabic transcription often renders English words in Arabic
 letters and spoken numbers as digits. These are diagnostic results, not a new
-benchmark or proof of improved naturalness. A single additional chunked pass
-at the upstream default of 32 steps is pending; the legacy baseline is reused.
-Kaggle reported its maximum two-batch-GPU-session limit on a retry. No 32-step
-result is available, and that setting was not promoted.
+benchmark or proof of improved naturalness.
+
+The previously queued single 32-step chunked pass completed and was verified
+on 2026-09-28. It reused the hash-verified 16-step legacy baseline and preserved
+the checkpoint, approved reference, prompt, five chunks, ASR model, and seed.
+The downloaded WAV hash matched, audio was finite/nonzero mono 24 kHz, and all
+three proxy error metrics were recomputed locally. WER was worse than chunked
+16-step inference, CER/EER were unchanged, and synthesis took 2.03 times as long.
+Keep the live setting at 16 steps. This one-prompt result does not establish
+which step count is best across other prompts.
+
+Evidence: `artifacts/long_text_32_probe.json`,
+`artifacts/long_text_32_verification.json`. Result SHA256:
+`fd62f346de0ff90f78ad23e949a2736d597331190c33f94cd7101837c5f9ba57`;
+WAV SHA256: `a6b7f8b2ac07853a4489550c1c51a6ccbd69bf95405246b0b22fe0eb4b78358f`.
 
 The verified 16-step repair was deployed at Space commit
 `2c34711b41a388e41a311ee4827944f00ed82cc5`. An anonymous request for the exact
